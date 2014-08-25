@@ -3,7 +3,7 @@ import urllib2
 import base64
 import StringIO
 
-from maraschino import app
+from maraschino import app, logger, WEBROOT
 from maraschino.tools import *
 import maraschino
 
@@ -45,7 +45,7 @@ def sickrage_url_no_api():
     return sickrage_http() + url_base
 
 
-def sickrage_api(params=None, use_json=True, dev=False):
+def sickrage_api(params=None, use_json=True, dev=True):
     username = get_setting_value('sickrage_user')
     password = get_setting_value('sickrage_password')
 
@@ -94,6 +94,25 @@ def xhr_sickrage():
         later=sickrage['later'],
         compact_view=compact_view,
         show_airdate=show_airdate,
+        
     )
+
+@app.route('/xhr/sickrage/get_banner/<inderxerid>/')
+def get_banner(inderxerid):
+    params = '/?cmd=show.getbanner&inderxerid=%s' % inderxerid
+    img = StringIO.StringIO(sickrage_api(params, use_json=False))
+    logger.log('SICKRAGE :: Getting banner %s' % inderxerid, 'DEBUG')
+    return send_file(img, mimetype='image/jpeg')
+
+
+@app.route('/xhr/sickrage/get_poster/<inderxerid>/')
+def get_poster(inderxerid):
+    params = '/?cmd=show.getposter&inderxerid=%s' % inderxerid
+    img = StringIO.StringIO(sickrage_api(params, use_json=False))
+    return send_file(img, mimetype='image/jpeg')
+
+# returns a link with the path to the required image from SB
+def get_pic(indexerid, style='banner'):
+    return '%s/xhr/sickrage/get_%s/%s' % ('http://localhost:7000', style, indexerid)
 
 
