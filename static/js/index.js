@@ -425,7 +425,7 @@ $(document).ready(function() {
 
   // Loading wheel on menu click
   $(document).on('click', '#sickbeard .menu li', function() {
-    $(this).children().css('background', 'url('+WEBROOT+'/static/images/xhrloading.gif) no-repeat center').html('&nbsp;');
+    $(this).children().css('background', 'url('+WEBROOT+'/static/images/loading.gif) no-repeat center').html('&nbsp;');
   });
 
   // Search Episode Functionality on Magnifying Glass png
@@ -725,6 +725,17 @@ $(document).ready(function() {
   });
 
   /******  END SICKBEARD Functions  *******/
+  
+  /*** SICKRAGE ***/
+  
+    // Coming episodes Menu
+  $(document).on('click', '#sickrage .menu .upcoming', function(){
+    $.get(WEBROOT + '/xhr/sickrage', function(data){
+      $('#sickbeard').replaceWith(data);
+    });
+  });
+  
+  /******  END SICKRAGE Functions  *******/
 
   /*********** EXTRA SETTINGS *************/
 
