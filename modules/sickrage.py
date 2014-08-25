@@ -97,20 +97,18 @@ def xhr_sickrage():
         
     )
 
-@app.route('/xhr/sickrage/get_banner/<inderxerid>/')
-def get_banner(inderxerid):
-    params = '/?cmd=show.getbanner&inderxerid=%s' % inderxerid
-    img = StringIO.StringIO(sickrage_api(params, use_json=False))
-    logger.log('SICKRAGE :: Getting banner %s' % inderxerid, 'DEBUG')
-    return send_file(img, mimetype='image/jpeg')
+@app.route('/xhr/sickrage/search_ep/<indexid>/<season>/<episode>/')
+@requires_auth
+def search_ep(indexid, season, episode):
+    params = '/?cmd=episode.search&indexerid=%s&season=%s&episode=%s' % (indexid, season, episode)
 
-
-@app.route('/xhr/sickrage/get_poster/<inderxerid>/')
-def get_poster(inderxerid):
-    params = '/?cmd=show.getposter&inderxerid=%s' % inderxerid
-    img = StringIO.StringIO(sickrage_api(params, use_json=False))
-    return send_file(img, mimetype='image/jpeg')
-
+    try:
+        sickrage = sickrage_api(params)
+        return jsonify(sickrage)
+    except:
+        return jsonify({'result': False})
+        
+ 
 @app.route('/xhr/sickrage/get_plot/<indexid>/<season>/<episode>/')
 def get_plot(indexid, season, episode):
     params = '/?cmd=episode&indexid=%s&season=%s&episode=%s' % (indexid, season, episode)
@@ -121,8 +119,271 @@ def get_plot(indexid, season, episode):
     except:
         return ''
 
+
+@app.route('/xhr/sickrage/get_all/')
+def get_all():
+    params = '/?cmd=shows&sort=name'
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    if sickrage['result'].rfind('success') >= 0:
+        sickrage = sickrage['data']
+
+        for show in sickrage:
+            sickrage[show]['url'] = get_pic(sickrage[show]['indexerid'], 'banner')
+
+    return render_template('sickrage/all.html',
+        sickrage=sickrage,
+    )
+
+
+@app.route('/xhr/sickrage/get_show_info/<indexerid>/')
+def show_info(indexerid):
+    params = '/?cmd=show&indexerid=%s' % indexerid
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    if sickrage['result'].rfind('success') >= 0:
+        sickrage = sickrage['data']
+        sickrage['url'] = get_pic(indexerid, 'banner')
+        sickrage['tvdb'] = indexerid
+
+    return render_template('sickrage/show.html',
+        sickrage=sickrage,
+    )
+
+
+@app.route('/xhr/sickrage/get_season/<indexerid>/<season>/')
+def get_season(indexerid, season):
+    params = '/?cmd=show.seasons&indexerid=%s&season=%s' % (indexerid, season)
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    if sickrage['result'].rfind('success') >= 0:
+        sickrage = sickrage['data']
+
+    return render_template('sickrage/season.html',
+        sickrage=sickrage,
+        id=indexerid,
+        season=season,
+    )
+
+
+@app.route('/xhr/sickrage/history/<limit>/')
+def history(limit):
+    params = '/?cmd=history&limit=%s' % limit
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    if sickrage['result'].rfind('success') >= 0:
+        sickrage = sickrage['data']
+
+        for show in sickrage:
+            show['image'] = get_pic(show['indexerid'])
+
+    return render_template('sickrage/history.html',
+        sickrage=sickrage,
+    )
+
+
 # returns a link with the path to the required image from SB
 def get_pic(indexerid, style='banner'):
     return '%s/xhr/sickrage/get_%s/%s' % (maraschino.WEBROOT, style, indexerid)
 
+@app.route('/xhr/sickrage/get_ep_info/<indexerid>/<season>/<ep>/')
+def get_episode_info(indexerid, season, ep):
+    params = '/?cmd=episode&indexerid=%s&season=%s&episode=%s&full_path=1' % (indexerid, season, ep)
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    if sickrage['result'].rfind('success') >= 0:
+        sickrage = sickrage['data']
+
+    return render_template('sickrage/episode.html',
+        sickrage=sickrage,
+        id=indexerid,
+        season=season,
+        ep=ep,
+    )
+
+@app.route('/xhr/sickrage/set_ep_status/<indexerid>/<season>/<ep>/<st>/')
+def set_episode_status(indexerid, season, ep, st):
+    params = '/?cmd=episode.setstatus&indexerid=%s&season=%s&episode=%s&status=%s' % (indexerid, season, ep, st)
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    status = 'error'
+
+    if sickrage['result'] == 'success':
+        status = 'success'
+
+    return jsonify({'status': status})
+
+@app.route('/xhr/sickrage/shutdown/')
+def shutdown():
+    params = '/?cmd=sb.shutdown'
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    return sickrage['message']
+
+
+@app.route('/xhr/sickrage/restart/')
+def restart():
+    params = '/?cmd=sb.restart'
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    return sickrage['message']
+
+
+@app.route('/xhr/sickrage/search/')
+def sb_search():
+    sickrage = {}
+    params = ''
+
+    try:
+        params = '&name=%s' % (urllib2.quote(request.args['name']))
+    except:
+        pass
+
+    try:
+        params = '&indexerid=%s' % (urllib2.quote(request.args['indexerid']))
+    except:
+        pass
+
+    try:
+        params = '&lang=%s' % (urllib2.quote(request.args['lang']))
+    except:
+        pass
+
+    if params is not '':
+        params = '/?cmd=sb.searchtvdb%s' % params
+
+        try:
+            sickrage = sickrage_api(params)
+            sickrage = sickrage['data']['results']
+        except:
+            sickrage = None
+
+    else:
+        sickrage = None
+
+    return render_template('sickrage/search.html',
+        data=sickrage,
+        sickrage='results',
+    )
+
+
+@app.route('/xhr/sickrage/add_show/<indexerid>/')
+def add_show(indexerid):
+    params = '/?cmd=show.addnew&indexerid=%s' % indexerid
+    try:
+        status = urllib2.quote(request.args['status'])
+        lang = urllib2.quote(request.args['lang'])
+        initial = urllib2.quote(request.args['initial'])
+        if status:
+            params += '&status=%s' % status
+
+        if lang:
+            params += '&lang=%s' % lang
+
+        if initial:
+            params += '&initial=%s' % initial
+    except:
+        pass
+
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    return sickrage['message']
+
+@app.route('/xhr/sickrage/get_banner/<inderxerid>/')
+def get_banner(inderxerid):
+    logger.log('SICKRAGE :: Getting banner %s' % inderxerid, 'DEBUG')
+    params = '/?cmd=show.getbanner&inderxerid=%s' % inderxerid
+    img = StringIO.StringIO(sickrage_api(params, use_json=False))
+    return send_file(img, mimetype='image/jpeg')
+
+
+@app.route('/xhr/sickrage/get_poster/<inderxerid>/')
+def get_poster(inderxerid):
+    params = '/?cmd=show.getposter&inderxerid=%s' % inderxerid
+    img = StringIO.StringIO(sickrage_api(params, use_json=False))
+    return send_file(img, mimetype='image/jpeg')
+
+@app.route('/xhr/sickrage/log/<level>/')
+def log(level):
+    params = '/?cmd=logs&min_level=%s' % level
+    try:
+        sickrage = sickrage_api(params)
+        if sickrage['result'].rfind('success') >= 0:
+            sickrage = sickrage['data']
+            if not sickrage:
+                sickrage = ['The %s log is empty' % level]
+
+    except:
+        sickrage = None
+
+    return render_template('sickrage/log.html',
+        sickrage=sickrage,
+        level=level,
+    )
+
+
+@app.route('/xhr/sickrage/delete_show/<indexerid>/')
+def delete_show(indexerid):
+    params = '/?cmd=show.delete&indexerid=%s' % indexerid
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    return sickrage['message']
+
+
+@app.route('/xhr/sickrage/refresh_show/<indexerid>/')
+def refresh_show(indexerid):
+    params = '/?cmd=show.refresh&indexerid=%s' % indexerid
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    return sickrage['message']
+
+
+@app.route('/xhr/sickrage/update_show/<indexerid>/')
+def update_show(indexerid):
+    params = '/?cmd=show.update&indexerid=%s' % indexerid
+    try:
+        sickrage = sickrage_api(params)
+    except:
+        raise Exception
+
+    return sickrage['message']
 
