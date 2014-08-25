@@ -45,7 +45,7 @@ def sickrage_url_no_api():
     return sickrage_http() + url_base
 
 
-def sickrage_api(params=None, use_json=True, dev=True):
+def sickrage_api(params=None, use_json=True, dev=False):
     username = get_setting_value('sickrage_user')
     password = get_setting_value('sickrage_password')
 
@@ -111,8 +111,18 @@ def get_poster(inderxerid):
     img = StringIO.StringIO(sickrage_api(params, use_json=False))
     return send_file(img, mimetype='image/jpeg')
 
+@app.route('/xhr/sickrage/get_plot/<indexid>/<season>/<episode>/')
+def get_plot(indexid, season, episode):
+    params = '/?cmd=episode&indexid=%s&season=%s&episode=%s' % (indexid, season, episode)
+
+    try:
+        sickrage = sickrage_api(params)
+        return sickrage['data']['description']
+    except:
+        return ''
+
 # returns a link with the path to the required image from SB
 def get_pic(indexerid, style='banner'):
-    return '%s/xhr/sickrage/get_%s/%s' % ('http://localhost:7000', style, indexerid)
+    return '%s/xhr/sickrage/get_%s/%s' % (maraschino.WEBROOT, style, indexerid)
 
 
