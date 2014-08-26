@@ -75,10 +75,14 @@ def xhr_sickrage():
         show_airdate = get_setting_value('sickrage_airdate') == '1'
 
         if sickrage['result'].rfind('success') >= 0:
+        	
+            logger.log('SICKRAGE :: Successful API call to %s' % params, 'DEBUG')
             sickrage = sickrage['data']
+
             for time in sickrage:
                 for episode in sickrage[time]:
                     episode['image'] = get_pic(episode['indexerid'], 'banner')
+                    logger.log('SICKRAGE :: Successful %s' % (episode['image']), 'DEBUG')
     except:
         return render_template('sickrage.html',
             sickrage='',
@@ -97,29 +101,6 @@ def xhr_sickrage():
         
     )
 
-@app.route('/xhr/sickrage/search_ep/<indexid>/<season>/<episode>/')
-@requires_auth
-def search_ep(indexid, season, episode):
-    params = '/?cmd=episode.search&indexerid=%s&season=%s&episode=%s' % (indexid, season, episode)
-
-    try:
-        sickrage = sickrage_api(params)
-        return jsonify(sickrage)
-    except:
-        return jsonify({'result': False})
-        
- 
-@app.route('/xhr/sickrage/get_plot/<indexid>/<season>/<episode>/')
-def get_plot(indexid, season, episode):
-    params = '/?cmd=episode&indexid=%s&season=%s&episode=%s' % (indexid, season, episode)
-
-    try:
-        sickrage = sickrage_api(params)
-        return sickrage['data']['description']
-    except:
-        return ''
-
-
 @app.route('/xhr/sickrage/get_all/')
 def get_all():
     params = '/?cmd=shows&sort=name'
@@ -131,13 +112,41 @@ def get_all():
 
     if sickrage['result'].rfind('success') >= 0:
         sickrage = sickrage['data']
-
         for show in sickrage:
             sickrage[show]['url'] = get_pic(sickrage[show]['indexerid'], 'banner')
+            
 
     return render_template('sickrage/all.html',
         sickrage=sickrage,
     )
+
+# returns a link with the path to the required image from SB
+def get_pic(indexerid, style='banner'):
+    try:
+    	return '%s/xhr/sickrage/get_%s/%s' % (maraschino.WEBROOT, style, indexerid)
+    except:
+    	raise Exception
+
+@app.route('/xhr/sickrage/search_ep/<indexerid>/<season>/<episode>/')
+@requires_auth
+def search_ep(indexerid, season, episode):
+    params = '/?cmd=episode.search&indexerid=%s&season=%s&episode=%s' % (indexerid, season, episode)
+    try:
+        sickrage = sickrage_api(params)
+        return jsonify(sickrage)
+    except:
+        return jsonify({'result': False})
+        
+ 
+@app.route('/xhr/sickrage/get_plot/<indexerid>/<season>/<episode>/')
+def get_plot(indexerid, season, episode):
+    params = '/?cmd=episode&indexerid=%s&season=%s&episode=%s' % (indexerid, season, episode)
+
+    try:
+        sickrage = sickrage_api(params)
+        return sickrage['data']['description']
+    except:
+        return ''
 
 
 @app.route('/xhr/sickrage/get_show_info/<indexerid>/')
@@ -150,9 +159,12 @@ def show_info(indexerid):
         raise Exception
 
     if sickrage['result'].rfind('success') >= 0:
+    	
+    	logger.log('SICKRAGE :: Successful API call to %s' % params, 'DEBUG')
         sickrage = sickrage['data']
         sickrage['url'] = get_pic(indexerid, 'banner')
-        sickrage['tvdb'] = indexerid
+        logger.log('SICKRAGE :: Successful %s' % (sickrage['url']), 'DEBUG')
+#        sickrage['indexerid'] = indexerid
 
     return render_template('sickrage/show.html',
         sickrage=sickrage,
@@ -169,7 +181,10 @@ def get_season(indexerid, season):
         raise Exception
 
     if sickrage['result'].rfind('success') >= 0:
+    	
+    	logger.log('SICKRAGE :: Successful API call to %s' % params, 'DEBUG')
         sickrage = sickrage['data']
+        
 
     return render_template('sickrage/season.html',
         sickrage=sickrage,
@@ -195,11 +210,6 @@ def history(limit):
     return render_template('sickrage/history.html',
         sickrage=sickrage,
     )
-
-
-# returns a link with the path to the required image from SB
-def get_pic(indexerid, style='banner'):
-    return '%s/xhr/sickrage/get_%s/%s' % (maraschino.WEBROOT, style, indexerid)
 
 @app.route('/xhr/sickrage/get_ep_info/<indexerid>/<season>/<ep>/')
 def get_episode_info(indexerid, season, ep):
@@ -322,17 +332,19 @@ def add_show(indexerid):
 
     return sickrage['message']
 
-@app.route('/xhr/sickrage/get_banner/<inderxerid>/')
-def get_banner(inderxerid):
-    logger.log('SICKRAGE :: Getting banner %s' % inderxerid, 'DEBUG')
-    params = '/?cmd=show.getbanner&inderxerid=%s' % inderxerid
+@app.route('/xhr/sickrage/get_banner/<indexerid>/')
+def get_banner(indexerid):
+    logger.log('SICKRAGE :: Getting banner %s' % indexerid, 'DEBUG')
+    params = '/?cmd=show.getbanner&indexerid=%s' % indexerid
+    logger.log('SICKRAGE :: Getting banner params %s' % params, 'DEBUG')
     img = StringIO.StringIO(sickrage_api(params, use_json=False))
+    logger.log('SICKRAGE :: Getting img params %s' % img, 'DEBUG')
     return send_file(img, mimetype='image/jpeg')
 
 
-@app.route('/xhr/sickrage/get_poster/<inderxerid>/')
-def get_poster(inderxerid):
-    params = '/?cmd=show.getposter&inderxerid=%s' % inderxerid
+@app.route('/xhr/sickrage/get_poster/<indexerid>/')
+def get_poster(indexerid):
+    params = '/?cmd=show.getposter&indexerid=%s' % indexerid
     img = StringIO.StringIO(sickrage_api(params, use_json=False))
     return send_file(img, mimetype='image/jpeg')
 

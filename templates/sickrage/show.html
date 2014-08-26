@@ -2,7 +2,7 @@
 
 {% block sickrage_content %}
 
-<div id="sb_content" class="noscroll">
+<div id="sr_content" class="noscroll">
   <div id='show'>
     <p class="sb-back operation_only">&laquo;</p>
     <div class="banner">
@@ -13,14 +13,14 @@
       <p class="genre">{{ sickrage.genre[0] }}</p>
       <p class="options">Options</p>
     </div>
-    <div class="manage" indexerid="{{sickrage.tvdb}}">
+    <div class="manage" indexerid="{{sickrage.indexerid}}">
       <div class="delete"><img src="{{ url_for('static', filename='images/no.png' )}}">Delete Show</div>
       <div class="refresh"><img src="{{ url_for('static', filename='images/refresh.png' )}}">Refresh Show</div>
       <div class="update"><img src="{{ url_for('static', filename='images/update.png' )}}">Update Show</div>
     </div>
     <ul class="seasons">
       {% for season in sickrage.season_list|sort %}
-      <li season="{{season}}" indexerid="{{sickrage.tvdb}}">Season {{ season }}</li>
+      <li season="{{season}}" indexerid="{{sickrage.indexerid}}">Season {{ season }}</li>
       {% endfor %}
     </ul>
   </div>
