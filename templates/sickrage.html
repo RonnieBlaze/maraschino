@@ -33,9 +33,9 @@
 {%- endmacro %}
 
 <div id="sr_content" class="noscroll">
-  <div id="future">
+  <div id="sr_future">
     {% if missed|length %}
-    <div id="missed" title="SB has missed {{ missed|length }} episodes">{{ missed|length }}</div>
+    <div id="sr_missed" title="SR has missed {{ missed|length }} episodes">{{ missed|length }}</div>
     <div class="missed">
       {% for show in missed %}
       {{item(show)}}
@@ -43,7 +43,7 @@
     </div>
     {% endif %}
     {% if today|length %}
-    <div id="today">
+    <div id="sr_today">
       <h3>Today</h3>
       {% for show in today %}
       {{item(show)}}
@@ -51,7 +51,7 @@
     </div>
     {% endif %}
     {% if soon|length %}
-    <div id="soon">
+    <div id="sr_soon">
       <h3>Soon</h3>
       {% for show in soon %}
       {{item(show)}}
@@ -59,7 +59,7 @@
     </div>
     {% endif %}
     {% if later|length %}
-    <div id="later">
+    <div id="sr_later">
       <h3>Later</h3>
       {% for show in later %}
       {{item(show)}}

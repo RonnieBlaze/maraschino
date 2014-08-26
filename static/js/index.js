@@ -748,7 +748,7 @@ $(document).ready(function() {
       }
     })
     .error(function(){
-      popup_message('Could not reach SickBeard.');
+      popup_message('Could not reach Sickrage.');
     });
   });
 
@@ -760,8 +760,8 @@ $(document).ready(function() {
 
   // Load show info from banner display
   $(document).on('click', '#sickrage .coming_ep .options img.banner', function(){
-    var tvdb = $(this).attr('id');
-    $.get(WEBROOT + '/xhr/sickrage/get_show_info/'+tvdb, function(data){
+    var indexer = $(this).attr('id');
+    $.get(WEBROOT + '/xhr/sickrage/get_show_info/'+indexer, function(data){
       $('#sickrage').replaceWith(data);
     });
   });
@@ -781,7 +781,7 @@ $(document).ready(function() {
   });
 
   // Toggle missed episodes
-  $(document).on('click', '#sickrage #missed', function(){
+  $(document).on('click', '#sickrage #sr_missed', function(){
     $('#sickrage .missed').toggle();
   });
 
@@ -827,14 +827,14 @@ $(document).ready(function() {
   });
 
   // Episode list back button functionality
-  $(document).on('click', '#sb_content > #show .sb-back', function(){
+  $(document).on('click', '#sr_content > #sr_show .sr-back', function(){
     $.get(WEBROOT + '/xhr/sickrage/get_all', function(data){
       $('#sickrage').replaceWith(data);
     });
   });
 
   // Season info
-  $(document).on('click', '#sb_content > #show ul.seasons li', function(){
+  $(document).on('click', '#sr_content > #sr_show ul.seasons li', function(){
     $.get(WEBROOT + '/xhr/sickrage/get_season/'+$(this).attr('indexerid')+'/'+$(this).attr('season'), function(data){
       $('#sickrage').replaceWith(data);
       $('#sickrage .episode-list .tablesorter').tablesorter({sortList: [[0,0]]});
@@ -864,18 +864,18 @@ $(document).ready(function() {
   });
 
   // Show Banner manager display
-  $(document).on('click', '#sickrage #show .banner .options' , function(){
+  $(document).on('click', '#sickrage #sr_show .banner .options' , function(){
     if($(this).hasClass('open')){  // closing
-      $('#sickrage #show .banner').transition({ y: '0px' });
+      $('#sickrage #sr_show .banner').transition({ y: '0px' });
     } else { // opening
-      $('#sickrage #show .banner').transition({ y: '-40px' });
+      $('#sickrage #sr_show .banner').transition({ y: '-40px' });
     }
     $(this).toggleClass('open');
   });
 
   // Delete show function
-  $(document).on('click', '#sickrage #show .manage .delete' , function(){
-    var id = $('#sickrage #show .manage').attr('indexerid');
+  $(document).on('click', '#sickrage #sr_show .manage .delete' , function(){
+    var id = $('#sickrage #sr_show .manage').attr('indexerid');
     $.get(WEBROOT + '/xhr/sickrage/delete_show/'+id)
     .success(function(data){
       popup_message(data);
@@ -886,8 +886,8 @@ $(document).ready(function() {
   });
 
   // Refresh show function
-  $(document).on('click', '#sickrage #show .manage .refresh' , function(){
-    var id = $('#sickrage #show .manage').attr('indexerid');
+  $(document).on('click', '#sickrage #sr_show .manage .refresh' , function(){
+    var id = $('#sickrage #sr_show .manage').attr('indexerid');
     $.get(WEBROOT + '/xhr/sickrage/refresh_show/'+id)
     .success(function(data){
       popup_message(data);
@@ -898,8 +898,8 @@ $(document).ready(function() {
   });
 
   // Update show function
-  $(document).on('click', '#sickrage #show .manage .update' , function(){
-    var id = $('#sickrage #show .manage').attr('indexerid');
+  $(document).on('click', '#sickrage #sr_show .manage .update' , function(){
+    var id = $('#sickrage #sr_show .manage').attr('indexerid');
     $.get(WEBROOT + '/xhr/sickrage/update_show/'+id)
     .success(function(data){
       popup_message(data);
@@ -939,8 +939,8 @@ $(document).ready(function() {
   });
 
   // Log info level change
-  $(document).on('change', '#sickrage #log .level', function(){
-    var level = $('#sickrage #log .level').attr('value');
+  $(document).on('change', '#sickrage #sr_log .level', function(){
+    var level = $('#sickrage #sr_log .level').attr('value');
     $.get(WEBROOT + '/xhr/sickrage/log/'+level, function(data){
       $('#sickrage').replaceWith(data);
     });
@@ -978,10 +978,10 @@ $(document).ready(function() {
   });
 
   // Add show function
-  $(document).on('click', '#sickrage #sb_search #result li', function(){
-    var status = $('#sb_search #status').find(':selected').val();
-    var lang = $('#sb_search #lang').find(':selected').val();
-    var initial = $('#sb_search #quality').find(':selected').val();
+  $(document).on('click', '#sickrage #sr_search #sr_result li', function(){
+    var status = $('#sr_search #sr_status').find(':selected').val();
+    var lang = $('#sr_search #sr_lang').find(':selected').val();
+    var initial = $('#sr_search #quality').find(':selected').val();
     var params = 'lang='+lang+'&status='+status+'&initial='+initial;
     $.get(WEBROOT + '/xhr/sickrage/add_show/'+$(this).attr('indexerid')+'/?'+params)
     .success(function(data){
