@@ -120,14 +120,13 @@ def xhr_trakt_recommendations(type=None, mobile=False):
 
     logger.log('TRAKT :: Fetching %s recommendations' % type, 'INFO')
 
-    url = 'http://api.trakt.tv/recommendations/%s/%s' % (type, trakt_apikey())
+    api = '/recommendations/%s?extended=full,images' % (type)
 
-    params = {
-        'hide_collected': True,
-        'hide_watchlisted': True
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
     }
     try:
-        recommendations = trak_api(url, params)
+        recommendations = trak_api(api, {}, header, True, False)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
