@@ -14,7 +14,7 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
                 })
     
     if oauth and TRAKT_TOKEN:
-        head.update({'Authorization': '%s' %(TRAKT_TOKEN)})
+        head.update({'trakt-user-token': '%s' %(TRAKT_TOKEN)})
         
     if body:
         body = json.JSONEncoder().encode(body)
