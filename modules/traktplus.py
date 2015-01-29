@@ -159,9 +159,9 @@ def xhr_trakt_trending(type=None, mobile=False):
     limit = int(get_setting_value('trakt_trending_limit'))
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
 
-    url = 'http://api.trakt.tv/%s/trending.json/%s' % (type, trakt_apikey())
+    url = '/%s/trending?extended=full,images&page=1&limit=%s' % (type, limit)
     try:
-        trakt = trak_api(url)
+        trakt = trak_api(api, {},{}, False, False)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
