@@ -4,24 +4,42 @@ from threading import Thread
 from maraschino.tools import get_setting_value, requires_auth, create_dir, download_image
 from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
 
-
-def trak_api(url, params={}, dev=False):
-    username = get_setting_value('trakt_username')
-    password = hashlib.sha1(get_setting_value('trakt_password')).hexdigest()
-
-    params = json.JSONEncoder().encode(params)
-    request = urllib2.Request(url, params)
-    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-    request.add_header("Authorization", "Basic %s" % base64string)
-
-    response = urllib2.urlopen(request)
-    response = response.read()
-    response = json.JSONDecoder().decode(response)
-
+def trak_api(api, body={}, head={}, oauth=False ,dev=False):
+      
+    url='https://private-anon-25c4ab8bb-trakt.apiary-mock.com'
+            
+    head.update({'Content-Type': 'application/json',
+                  'trakt-api-version' : '2',
+                  'trakt-api-key': '%s' %(trakt_apikey())
+                })
+    
+    if oauth and TRAKT_TOKEN:
+        head.update({'Authorization': '%s' %(TRAKT_TOKEN)})
+        
+    if body:
+        body = json.JSONEncoder().encode(body)
+        request = Request(url + api, data=body, headers=head)
+    else:
+        request = Request(url + api, headers=head)
+    
+    try:
+        response = urlopen(request)         
+    except URLError as e: 
+        if hasattr(e, 'reason'):
+            logger.log('TRAKT :: Failed to reach server.', 'ERROR')
+            logger.log('TRAKT :: Reason: %s' %(e.reason), 'ERROR')
+        elif hasattr(e, 'code'):
+            logger.log('TRAKT :: Request Failed', 'ERROR')
+            logger.log('TRAKT :: Error code: %s' %(e.code), 'ERROR')
+    else:
+        response = json.load(response)
+    
     if dev:
-        print url
-        print json.dumps(response, sort_keys=True, indent=4)
-
+        logger.log('TRAKT :: API URL - %s' %(request.get_full_url()), 'DEBUG') 
+        logger.log('TRAKT :: API Headers - %s' %(request.headers), 'DEBUG')
+        logger.log('TRAKT :: API Body - %s' %(request.get_data()), 'DEBUG')
+        logger.log('TRAKT :: API Response - %s' %(response), 'DEBUG')
+    
     return response
 
 
