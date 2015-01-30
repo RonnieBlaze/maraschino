@@ -272,10 +272,14 @@ def xhr_trakt_profile(user=None, mobile=False):
 
     logger.log('TRAKT :: Fetching %s\'s profile information' % user, 'INFO')
 
-    url = 'http://api.trakt.tv/user/profile.json/%s/%s/' % (trakt_apikey(), user)
+    api = '/users/%s' % (user)
+
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
 
     try:
-        trakt = trak_api(url)
+        trakt = trak_api(api, {}, header, True, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
