@@ -245,11 +245,14 @@ def xhr_trakt_friends(user=None, mobile=False):
 @app.route('/xhr/trakt/friend/<action>/<user>')
 @requires_auth
 def xhr_trakt_friend_action(action, user):
-    url = 'http://api.trakt.tv/friends/%s/%s' % (action, trakt_apikey())
-    params = {'friend': user}
-
+    api = '/users/%s/history/%s' % (action, user)
+    
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
+    
     try:
-        trakt = trak_api(url, params)
+        trakt = trak_api(api, {}, header, True, True)
     except Exception as e:
         trakt_exception(e)
         return jsonify(status='%s friend failed\n%s' % (action.title(), e))
