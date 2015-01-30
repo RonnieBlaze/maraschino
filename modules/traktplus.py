@@ -215,15 +215,19 @@ def xhr_trakt_friends(user=None, mobile=False):
     logger.log('TRAKT :: Fetching friends list', 'INFO')
     pending = []
     if not user:
-        friends_url = 'http://api.trakt.tv/user/friends.json/%s/%s' % (trakt_apikey(), get_setting_value('trakt_username'))
-        pending_url = 'http://api.trakt.tv/friends/requests/%s' % trakt_apikey()
+        friends_api = '/users/%s/friends' % (get_setting_value('trakt_username'))
+        pending_api = '/users/requests'
     else:
-        friends_url = 'http://api.trakt.tv/user/friends.json/%s/%s' % (trakt_apikey(), user)
+        friends_api = '/users/%s/friends' % (user)
+    
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
 
     try:
-        friends = trak_api(friends_url)
+        friends = trak_api(friends_api, {}, {}, False, True)
         if not user:
-            pending = trak_api(pending_url)
+            pending = trak_api(pending_api, {}, headers, True, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
