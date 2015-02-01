@@ -417,10 +417,14 @@ def xhr_trakt_rated(user, type=None, mobile=False):
     if not type:
         type = get_setting_value('trakt_default_media')
     logger.log('TRAKT :: Fetching %s\'s rated %s' % (user, type), 'INFO')
-    url = 'http://api.trakt.tv/user/ratings/%s.json/%s/%s/all/extended' % (type, trakt_apikey(), user)
-
+    api = '/users/%s/ratings/%s' % (user, type)
+    
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
+    
     try:
-        trakt = trak_api(url)
+        trakt = trak_api(api, {}, header, True, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
