@@ -384,10 +384,14 @@ def xhr_trakt_watchlist(user, type=None, mobile=False):
         type = get_setting_value('trakt_default_media')
 
     logger.log('TRAKT :: Fetching %s\'s %s watchlist' % (user, type), 'INFO')
-    url = 'http://api.trakt.tv/user/watchlist/%s.json/%s/%s/' % (type, trakt_apikey(), user)
+    api = '/users/%s/watchlist/%s' % (user, type)
+    
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
 
     try:
-        trakt = trak_api(url)
+        trakt = trak_api(api, {}, header, True, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
