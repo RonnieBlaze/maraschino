@@ -464,15 +464,21 @@ def xhr_trakt_rated(user, type=None, mobile=False):
 @requires_auth
 def xhr_trakt_calendar(type, mobile=False):
     logger.log('TRAKT :: Fetching %s calendar' % type, 'INFO')
+    today = time.strftime('%Y-%m-%d')
     username = get_setting_value('trakt_username')
 
+    api = '/calendars/%s/%s/7' & (type, today)
     if type == 'my shows':
-        url = 'http://api.trakt.tv/user/calendar/shows.json/%s/%s' % (trakt_apikey(), username)
+        header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
+        auth = True
     else:
-        url = 'http://api.trakt.tv/calendar/%s.json/%s/' % (type, trakt_apikey())
+        header = {}
+        auth = False
 
     try:
-        trakt = trak_api(url)
+        trakt = trak_api(api, {}, header, auth, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
