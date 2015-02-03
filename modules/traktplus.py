@@ -6,7 +6,7 @@ from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
 
 def trak_api(api, body={}, head={}, oauth=False ,dev=False):
       
-    url='https://private-anon-25c4ab8bb-trakt.apiary-mock.com'
+    url='https://api.trakt.tv'
             
     head.update({'Content-Type': 'application/json',
                   'trakt-api-version' : '2',
