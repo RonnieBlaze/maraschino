@@ -166,11 +166,12 @@ def xhr_trakt_trending(type=None, mobile=False):
         trakt = trak_api(api, {},{}, False, True)
     except Exception as e:
         trakt_exception(e)
+        logger.log('TRAKT :: Exception = %s' % e, 'ERROR')
         return render_template('traktplus/trakt-base.html', message=e)
 
     if mobile:
         return trakt
-
+    logger.log('TRAKT :: len(trakt) = %s' % len(trakt), 'ERROR')
     if len(trakt) > limit:
         trakt = trakt[:limit]
 
