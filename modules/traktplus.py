@@ -18,12 +18,12 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
         
     if body:
         body = json.JSONEncoder().encode(body)
-        request = Request(url + api, data=body, headers=head)
+        request = urllib2.Request(url + api, data=body, headers=head)
     else:
-        request = Request(url + api, headers=head)
+        request = urllib2.Request(url + api, headers=head)
     
     try:
-        response = urlopen(request)         
+        response = urllib2.urlopen(request)         
     except URLError as e: 
         if hasattr(e, 'reason'):
             logger.log('TRAKT :: Failed to reach server.', 'ERROR')
