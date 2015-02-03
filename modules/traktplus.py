@@ -617,8 +617,13 @@ def xhr_trakt_add_to_list():
 
     if exist == 'false':
         logger.log('TRAKT :: Creating new custom list: %s' % (list[0]['value']), 'INFO')
-        url = 'http://api.trakt.tv/lists/add/%s' % trakt_apikey()
-
+        
+        api = '/users/%s/lists' % (get_setting_value('trakt_username'))
+        
+        header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+        }
+        
         list_params = {}
         for item in list:
             if item['value'] == '0':
@@ -630,7 +635,7 @@ def xhr_trakt_add_to_list():
         list = list_params
 
         try:
-            trakt = trak_api(url, list)
+            trakt = trak_api(api, list, header, True, True)
         except Exception as e:
             trakt_exception(e)
             return jsonify(status='Failed to add %s to %s\n%s' % (media['title'], list['name'], e))
@@ -638,14 +643,18 @@ def xhr_trakt_add_to_list():
         list['slug'] = list['name'].replace(' ', '-')
 
     logger.log('TRAKT :: Adding %s to %s' % (media['title'], list['name']), 'INFO')
-    url = 'http://api.trakt.tv/lists/items/add/%s' % (trakt_apikey())
+    api = '/users/%s/lists/%s' % (get_setting_value('trakt_username'), list['slug'] )
     params = {
         'slug': list['slug'],
         'items': [media]
     }
-
+    
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
+    
     try:
-        trakt = trak_api(url, params)
+        trakt = trak_api(api, params, header, True, True)
     except Exception as e:
         trakt_exception(e)
         return jsonify(status='Failed to add %s to %s\n%s' % (media['title'], list['name'], e))
