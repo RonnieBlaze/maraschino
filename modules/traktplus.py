@@ -175,8 +175,8 @@ def xhr_trakt_trending(type=None, mobile=False):
         trakt = trakt[:limit]
 
     for item in trakt:
-        item['images']['poster'] = cache_image(item['images']['poster'], type)
-        logger.log('TRAKT :: caching image %s' % item['images']['poster'], 'ERROR')
+        item['images']['poster']['medium'] = cache_image(item['images']['poster']['medium'], type)
+        logger.log('TRAKT :: caching image %s' % item['images']['poster']['medium'], 'ERROR')
 
     while THREADS:
         time.sleep(1)
