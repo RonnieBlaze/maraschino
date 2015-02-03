@@ -13,7 +13,7 @@ from maraschino.tools import *
 @requires_auth
 def xhr_trakt():
     trakt = {}
-    TRAKT_API_KEY = None
+    TRAKT_API_KEY = f44a0396c599ac570a39434549882e648edee9c9ecb21827f246cbe309907584
 
     try:
         xbmc = jsonrpclib.Server(server_api_address())
