@@ -166,7 +166,6 @@ def xhr_trakt_trending(type=None, mobile=False):
         trakt = trak_api(api, {},{}, False, True)
     except Exception as e:
         trakt_exception(e)
-        logger.log('TRAKT :: Exception = %s' % e, 'ERROR')
         return render_template('traktplus/trakt-base.html', message=e)
 
     if mobile:
@@ -177,6 +176,7 @@ def xhr_trakt_trending(type=None, mobile=False):
 
     for item in trakt:
         item['images']['poster'] = cache_image(item['images']['poster'], type)
+        logger.log('TRAKT :: caching image %s' % item['images']['poster'], 'ERROR')
 
     while THREADS:
         time.sleep(1)
