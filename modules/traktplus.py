@@ -159,7 +159,7 @@ def xhr_trakt_trending(type=None, mobile=False):
     limit = int(get_setting_value('trakt_trending_limit'))
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
 
-    api = '/%s/trending?extended=full,images&page=1&limit=%s' % (type, limit)
+    api = '/%s/trending?extended=images&page=1&limit=%s' % (type, limit)
     
     logger.log('TRAKT :: api url = %s' % api, 'ERROR')
     try:
