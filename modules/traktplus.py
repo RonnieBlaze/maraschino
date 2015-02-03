@@ -160,8 +160,10 @@ def xhr_trakt_trending(type=None, mobile=False):
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
 
     api = '/%s/trending?extended=full,images&page=1&limit=%s' % (type, limit)
+    
+    logger.log('TRAKT :: api url = %s' % api, 'ERROR')
     try:
-        trakt = trak_api(api, {},{}, False, False)
+        trakt = trak_api(api, {},{}, False, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
