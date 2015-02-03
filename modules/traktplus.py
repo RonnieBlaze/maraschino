@@ -499,12 +499,18 @@ def xhr_trakt_calendar(type, mobile=False):
 def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
 
     if type == 'episode':
-        url = 'http://api.trakt.tv/show/%s/summary.json/%s/%s/%s/%s' % (type, trakt_apikey(), id, season, episode)
+        api = '/show/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
+    elif type == 'show':
+        api = '/shows/%s?extended=full,images' % (id)
     else:
-        url = 'http://api.trakt.tv/%s/summary.json/%s/%s' % (type, trakt_apikey(), id)
-
+        api = '/movies/%s?extended=full,images' % (id)
+        
+    header = {
+        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
+    }
+    
     try:
-        trakt = trak_api(url)
+        trakt = trak_api(api, {}, header, True, True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
