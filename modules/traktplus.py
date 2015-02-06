@@ -6,7 +6,7 @@ from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
 
 def trak_api(api, body={}, head={}, oauth=False ,dev=False):
       
-    url='https://api.trakt.tv'
+    url='https://private-anon-25c4ab8bb-trakt.apiary-mock.com'
             
     head.update({'Content-Type': 'application/json',
                   'trakt-api-version' : '2',
@@ -159,24 +159,23 @@ def xhr_trakt_trending(type=None, mobile=False):
     limit = int(get_setting_value('trakt_trending_limit'))
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
 
-    api = '/%s/trending?extended=images&page=1&limit=%s' % (type, limit)
+    api = '/%s/trending?extended=full,images&page=1&limit=%s' % (type, limit)
     
-    logger.log('TRAKT :: api url = %s' % api, 'ERROR')
     try:
-        trakt = trak_api(api, {},{}, False, True)
+        trakt = trak_api(api, {},{}, False, False)
     except Exception as e:
         trakt_exception(e)
+        
         return render_template('traktplus/trakt-base.html', message=e)
 
     if mobile:
         return trakt
-    logger.log('TRAKT :: len(trakt) = %s' % len(trakt), 'ERROR')
+    
     if len(trakt) > limit:
         trakt = trakt[:limit]
 
     for item in trakt:
-        item['images']['poster']['medium'] = cache_image(item['images']['poster']['medium'], type)
-        logger.log('TRAKT :: caching image %s' % item['images']['poster']['medium'], 'ERROR')
+        item['images']['poster'] = cache_image(item['images']['poster'], type)
 
     while THREADS:
         time.sleep(1)
