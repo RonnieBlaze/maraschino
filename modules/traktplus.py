@@ -168,8 +168,12 @@ def xhr_trakt_trending(type=None, mobile=False):
     if len(trakt) > limit:
         trakt = trakt[:limit]
 
-    for item in trakt:
-        item['images']['poster'] = cache_image(item['images']['poster'], type)
+    if type == 'shows':
+          for item in trakt:
+                item['show']['images']['poster']['thumb'] = cache_image(item['show']['images']['poster']['thumb'], type)
+    else:
+          for item in trakt:
+                item['movie']['images']['poster']['thumb'] = cache_image(item['movie']['images']['poster']['thumb'], type)
 
     while THREADS:
         time.sleep(1)
