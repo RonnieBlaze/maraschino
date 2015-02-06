@@ -6,7 +6,7 @@ from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
 
 def trak_api(api, body={}, head={}, oauth=False ,dev=False):
       
-    url='https://private-anon-25c4ab8bb-trakt.apiary-mock.com'
+    url='https://api-v2launch.trakt.tv'
             
     head.update({'Content-Type': 'application/json',
                   'trakt-api-version' : '2',
@@ -22,23 +22,16 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
     else:
         request = urllib2.Request(url + api, headers=head)
     
-    try:
-        response = urllib2.urlopen(request)         
-    except URLError as e: 
-        if hasattr(e, 'reason'):
-            logger.log('TRAKT :: Failed to reach server.', 'ERROR')
-            logger.log('TRAKT :: Reason: %s' %(e.reason), 'ERROR')
-        elif hasattr(e, 'code'):
-            logger.log('TRAKT :: Request Failed', 'ERROR')
-            logger.log('TRAKT :: Error code: %s' %(e.code), 'ERROR')
-    else:
-        response = json.load(response)
+
+        response = urllib2.urlopen(request)
+        response = response.read()
+        response = json.JSONDecoder().decode(response)
     
     if dev:
-        logger.log('TRAKT :: API URL - %s' %(request.get_full_url()), 'DEBUG') 
-        logger.log('TRAKT :: API Headers - %s' %(request.headers), 'DEBUG')
-        logger.log('TRAKT :: API Body - %s' %(request.get_data()), 'DEBUG')
-        logger.log('TRAKT :: API Response - %s' %(response), 'DEBUG')
+      print url + api
+      print head
+      print body
+      print json.dumps(response, sort_keys=True, indent=4)
     
     return response
 
