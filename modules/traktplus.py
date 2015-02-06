@@ -171,10 +171,11 @@ def xhr_trakt_trending(type=None, mobile=False):
     if type == 'shows':
           for item in trakt:
                 item['show']['images']['poster']['thumb'] = cache_image(item['show']['images']['poster']['thumb'], type)
+                item['show']['rating'] = int(item['show']['rating'] * 10)
     else:
           for item in trakt:
                 item['movie']['images']['poster']['thumb'] = cache_image(item['movie']['images']['poster']['thumb'], type)
-
+                item['movie']['rating'] = int(item['movie']['rating'] * 10)
     while THREADS:
         time.sleep(1)
 
