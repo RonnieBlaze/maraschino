@@ -53,6 +53,12 @@ def get_list(content, media_type):
     
     return list
 
+def sync_matching(media_type, json_parm, list1=[], list2=[]):
+    for items in list1:
+          for matches in list2:
+                if items[media_type]['ids']['trakt'] == matches[media_type]['ids']['trakt']:
+                      items[media_type].update({json_parm:True})
+                      
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'shows'))
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'movies'))
 
