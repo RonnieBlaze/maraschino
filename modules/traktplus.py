@@ -174,7 +174,24 @@ def xhr_trakt_trending(type=None, mobile=False):
         trakt = trak_api(api, {},{}, False, False)
     except Exception as e:
         trakt_exception(e)
+        return render_template('traktplus/trakt-base.html', message=e)
         
+    try:
+        sync_matching( type[:-1], 'in_collection', trakt, get_list('collection', type) )
+    except Exception as e:
+        trakt_exception(e)
+        return render_template('traktplus/trakt-base.html', message=e)
+
+    try:
+        sync_matching( type[:-1], 'watched', trakt, get_list('watched', type) )
+    except Exception as e:
+        trakt_exception(e)
+        return render_template('traktplus/trakt-base.html', message=e)
+
+    try:
+        sync_matching( type[:-1], 'in_watchlist', trakt, get_list('watchlist', type) )
+    except Exception as e:
+        trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
 
     if mobile:
