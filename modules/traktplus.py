@@ -44,6 +44,15 @@ def trakt_exception(e):
     logger.log('TRAKT :: EXCEPTION -- %s' % e, 'DEBUG')
     return e
 
+def get_list(content, media_type):
+    if content == 'lists':
+          api = '/users/me/lists'
+    else:
+          api = '/sync/%s/%s' % (content, media_type)
+    list = trak_api(api, oauth=True)
+    
+    return list
+
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'shows'))
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'movies'))
 
