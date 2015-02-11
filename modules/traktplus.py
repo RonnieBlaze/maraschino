@@ -14,7 +14,7 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
                 })
     
     if oauth and TRAKT_TOKEN:
-        head.update({'trakt-user-token': '%s' %(TRAKT_TOKEN)})
+        head.update({'trakt-user-token': TRAKT_TOKEN['token']})
         head.update({'trakt-user-login': get_setting_value('trakt_username')})
         
     if body:
