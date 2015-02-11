@@ -30,33 +30,33 @@
           >
             <img alt="" src="{{ item.show.images.poster.thumb }}" height="141" width="95"/>
   
-            {% if item.in_collection %}
+            {% if item.show.in_collection %}
               <div class="collection"></div>
             {% endif %}
-            {% if item.in_watchlist %}
+            {% if item.show.in_watchlist %}
               <div class="watchlist"></div>
             {% endif %}
-            {% if item.rating %}
-              {% if item.rating == 'love' %}
+            {% if item.show.rating %}
+              {% if item.show.rating == 'love' %}
                 <div class="love"></div>
-              {% elif item.rating == 'hate' %}
+              {% elif item.show.rating == 'hate' %}
                 <div class="hate"></div>
               {% endif %}
             {% endif %}
-            {% if item.watched %}
+            {% if item.show.watched %}
               <div class="watched"></div>
             {% endif %}
           </div>
   
           <div class="overlay_menu" align="center">
-            {% if not item.watched %}
+            {% if not item.show.watched %}
               <div class="mark_watched" title="Mark as watched"></div>
             {% endif %}
-            {% if not item.in_watchlist %}
+            {% if not item.show.in_watchlist %}
               <div class="add_watchlist" title="Add to watchlist"></div>
             {% endif %}
             <div class="add_customlist" title="Add to custom list"></div>
-            {% if not item.in_collection %}
+            {% if not item.show.in_collection %}
               <div class="add_collection" title="Add to collection"></div>
             {% endif %}
           </div>
@@ -66,8 +66,8 @@
             <span class="votes">{{ item.show.votes }} votes</span>
             </div>
             <div class="item_rate" align="center">
-              <div class="rate r_love {{ 'rated' if item.rating == 'love' }}" data-rating="love" {% if item.rating == 'love' %}title="Unrate"{% else %}title="Loved"{% endif %}></div>
-              <div class="rate r_hate {{ 'rated' if item.rating == 'hate' }}" data-rating="hate" {% if item.rating == 'hate' %}title="Unrate"{% else %}title="Hated"{% endif %}></div>
+              <div class="rate r_love {{ 'rated' if item.show.rating == 'love' }}" data-rating="love" {% if item.show.rating == 'love' %}title="Unrate"{% else %}title="Loved"{% endif %}></div>
+              <div class="rate r_hate {{ 'rated' if item.show.rating == 'hate' }}" data-rating="hate" {% if item.show.rating == 'hate' %}title="Unrate"{% else %}title="Hated"{% endif %}></div>
             </div>
           </div>
         </div>
@@ -88,33 +88,33 @@
     			>
     			  <img alt="" src="{{ item.movie.images.poster.thumb }}" height="141" width="95"/>
     
-    			  {% if item.in_collection %}
+    			  {% if item.movie.in_collection %}
     				  <div class="collection"></div>
     			  {% endif %}
-    			  {% if item.in_watchlist %}
+    			  {% if item.movie.in_watchlist %}
     				  <div class="watchlist"></div>
     			  {% endif %}
-    			  {% if item.rating %}
-    				{% if item.rating == 'love' %}
+    			  {% if item.movie.rating %}
+    				{% if item.movie.rating == 'love' %}
     				  <div class="love"></div>
-    				{% elif item.rating == 'hate' %}
+    				{% elif item.movie.rating == 'hate' %}
     				  <div class="hate"></div>
     				{% endif %}
     			  {% endif %}
-    			  {% if item.watched %}
+    			  {% if item.movie.watched %}
     				  <div class="watched"></div>
     			  {% endif %}
     			</div>
   
     			<div class="overlay_menu" align="center">
-    			  {% if not item.watched %}
+    			  {% if not item.movie.watched %}
     				  <div class="mark_watched" title="Mark as watched"></div>
     			  {% endif %}
-    			  {% if not item.in_watchlist %}
+    			  {% if not item.movie.in_watchlist %}
     				  <div class="add_watchlist" title="Add to watchlist"></div>
     			  {% endif %}
     			    <div class="add_customlist" title="Add to custom list"></div>
-    			  {% if not item.in_collection %}
+    			  {% if not item.movie.in_collection %}
     				  <div class="add_collection" title="Add to collection"></div>
     			  {% endif %}
     			</div>
@@ -124,8 +124,8 @@
     			    <span class="votes">{{ item.movie.votes }} votes</span>
     			  </div>
     			  <div class="item_rate" align="center">
-    				  <div class="rate r_love {{ 'rated' if item.rating == 'love' }}" data-rating="love" {% if item.rating == 'love' %}title="Unrate"{% else %}title="Loved"{% endif %}></div>
-    				  <div class="rate r_hate {{ 'rated' if item.rating == 'hate' }}" data-rating="hate" {% if item.rating == 'hate' %}title="Unrate"{% else %}title="Hated"{% endif %}></div>
+    				  <div class="rate r_love {{ 'rated' if item.movie.rating == 'love' }}" data-rating="love" {% if item.movie.rating == 'love' %}title="Unrate"{% else %}title="Loved"{% endif %}></div>
+    				  <div class="rate r_hate {{ 'rated' if item.movie.rating == 'hate' }}" data-rating="hate" {% if item.movie.rating == 'hate' %}title="Unrate"{% else %}title="Hated"{% endif %}></div>
     			  </div>
   			  </div>
   		  </div>
