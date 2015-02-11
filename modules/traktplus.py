@@ -10,11 +10,12 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
             
     head.update({'Content-Type': 'application/json',
                   'trakt-api-version' : '2',
-                  'trakt-api-key': '%s' %(trakt_apikey())
+                  'trakt-api-key': 'f44a0396c599ac570a39434549882e648edee9c9ecb21827f246cbe309907584' #Trakt Client ID
                 })
     
     if oauth and TRAKT_TOKEN:
         head.update({'trakt-user-token': '%s' %(TRAKT_TOKEN)})
+        head.update({'trakt-user-login': get_setting_value('trakt_username')})
         
     if body:
         body = json.JSONEncoder().encode(body)
@@ -36,8 +37,17 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
     return response
 
 
-def trakt_apikey():
-    return get_setting_value('trakt_api_key')
+def trakt_apitoken():
+    username = get_setting_value('trakt_username')
+    password = get_setting_value('trakt_password')
+    api = '/auth/login'
+
+    credentials = {
+        'login': username,
+        'password': password
+    }
+      
+    return trak_api(api, body=credentials)
 
 
 def trakt_exception(e):
@@ -61,7 +71,7 @@ def sync_matching(media_type, json_parm, list1=[], list2=[]):
                       
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'shows'))
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'movies'))
-
+TRAKT_TOKEN = trakt_apitoken()
 
 def small_poster(image):
     if not 'poster-small' in image:
