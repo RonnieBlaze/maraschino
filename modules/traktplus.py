@@ -23,10 +23,9 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
     else:
         request = urllib2.Request(url + api, headers=head)
     
-
-        response = urllib2.urlopen(request)
-        response = response.read()
-        response = json.JSONDecoder().decode(response)
+    response = urllib2.urlopen(request)
+    response = response.read()
+    response = json.JSONDecoder().decode(response)
     
     if dev:
       print url + api
