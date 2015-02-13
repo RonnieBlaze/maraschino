@@ -41,9 +41,9 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
 
 def trakt_apitoken():
     global TRAKT_TOKEN
+    username = get_setting_value('trakt_username')
 
     if not username in TRAKT_TOKEN:
-            username = get_setting_value('trakt_username')
             password = get_setting_value('trakt_password')
             api = '/auth/login'
 
