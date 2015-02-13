@@ -4,9 +4,12 @@ from threading import Thread
 from maraschino.tools import get_setting_value, requires_auth, create_dir, download_image
 from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
 
+TRAKT_TOKEN = {}
+
 def trak_api(api, body={}, head={}, oauth=False ,dev=False):
-      
+    global TRAKT_TOKEN      
     url='https://api-v2launch.trakt.tv'
+    username = get_setting_value('trakt_username')
             
     head.update({'Content-Type': 'application/json',
                   'trakt-api-version' : '2',
@@ -14,8 +17,8 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
                 })
     
     if oauth and TRAKT_TOKEN:
-        head.update({'trakt-user-token': TRAKT_TOKEN['token']})
-        head.update({'trakt-user-login': get_setting_value('trakt_username')})
+        head.update({'trakt-user-token': TRAKT_TOKEN[username]})
+        head.update({'trakt-user-login': username})
         
     if body:
         body = json.JSONEncoder().encode(body)
@@ -37,17 +40,19 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
 
 
 def trakt_apitoken():
-    username = get_setting_value('trakt_username')
-    password = get_setting_value('trakt_password')
-    api = '/auth/login'
+    global TRAKT_TOKEN
 
-    credentials = {
-        'login': username,
-        'password': password
-    }
-      
-    return trak_api(api, body=credentials)
+    if not username in TRAKT_TOKEN:
+            username = get_setting_value('trakt_username')
+            password = get_setting_value('trakt_password')
+            api = '/auth/login'
 
+            credentials = {
+                  'login': username,
+                  'password': password
+            }
+            token = trak_api(api, body=credentials)
+            TRAKT_TOKEN.update({username:token['token']})
 
 def trakt_exception(e):
     logger.log('TRAKT :: EXCEPTION -- %s' % e, 'DEBUG')
@@ -174,6 +179,7 @@ def xhr_trakt_trending(type=None, mobile=False):
     if not type:
         type = get_setting_value('trakt_default_media')
 
+    trakt_apitoken()
     limit = int(get_setting_value('trakt_trending_limit'))
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
 
