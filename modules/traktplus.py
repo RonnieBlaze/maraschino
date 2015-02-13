@@ -75,7 +75,6 @@ def sync_matching(media_type, json_parm, list1=[], list2=[]):
                       
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'shows'))
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'movies'))
-TRAKT_TOKEN = trakt_apitoken()
 
 def small_poster(image):
     if not 'poster-small' in image:
