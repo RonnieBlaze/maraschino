@@ -13,15 +13,15 @@
         data-type="{{ type }}"
         data-title="{{ show.title }}"
         data-year="{{ show.year }}"
-        data-imdb_id="{{ show.imdb_id }}"
+        data-imdb_id="{{ show.ids.imdb }}"
         {% if type == 'shows' %}
-          data-tmdb_id="{{ show.tmdb_id }}"
+          data-tmdb_id="{{ show.ids.tmdb }}"
         {% else %}
-          data-tvdb_id="{{ show.tvdb_id }}"
+          data-tvdb_id="{{ show.ids.tvdb }}"
         {% endif %}
       >
         <div>
-          <img alt="" src="{{ show.images.poster }}" height="141" width="95"/>
+          <img alt="" src="{{ show.images.poster.thumb }}" height="141" width="95"/>
 
           {% if show.in_collection %}
             <div class="collection"></div>
@@ -55,8 +55,8 @@
         </div>
         <div class="footer">
           <div class="item_info">
-          <span class="percentage">{{ show.ratings.percentage }}%</span>
-          <span class="votes">{{ show.ratings.votes }} votes</span>
+          <span class="percentage">{{ show.rating|round|int }}%</span>
+          <span class="votes">{{ show.votes }} votes</span>
           </div>
           <div class="item_rate" align="center">
             <div class="rate r_love {{ 'rated' if show.rating == 'love' }}" data-rating="love" {% if show.rating == 'love' %}title="Unrate"{% else %}title="Loved"{% endif %}></div>
@@ -66,10 +66,10 @@
       </div>
 
       <div class="options">
-        <a class="media_btn add_sickbeard" title="Add to Sick Beard" data-tvdb_id="{{ show.tvdb_id }}">
+        <a class="media_btn add_sickbeard" title="Add to Sick Beard" data-tvdb_id="{{ show.ids.tvdb }}">
           <img src="{{ url_for('static', filename='images/applications/SickBeard.png') }}" width="14" height="14"/>
         </a>
-        <a class="media_btn" href="{{ show.url }}" target="_blank" title="View on trakt.tv">
+        <a class="media_btn" href="http:\\trakt.tv\show\{{ show.ids.slug }}" target="_blank" title="View on trakt.tv">
           <img src="{{ url_for('static', filename='images/applications/Trakt.png') }}" width="14" height="14"/>
         </a>
       </div>
@@ -81,7 +81,7 @@
         </tr>
         <tr>
           <td><b>Airs:</b></td>
-          <td>{{ show.air_day }}s at {{ show.air_time }} on {{ show.network }}</td>
+          <td>{{ show.airs.day }}s at {{ show.airs.time }} on {{ show.network }}</td>
         </tr>
         <tr>
           <td><b>Premiered:</b></td>
@@ -118,42 +118,42 @@
           <table>
             <tr>
               <td><b>Watchers:</b></td>
-              <td>{{ show.stats.watchers }}</td>
+              <td>{{ stats.watchers }}</td>
             </tr>
             <tr>
               <td><b>Plays:</b></td>
-              <td>{{ show.stats.plays }}</td>
+              <td>{{ stats.plays }}</td>
             </tr>
             <tr>
               <td><b>Scrobbles:</b></td>
-              <td>{{ show.stats.scrobbles }}</td>
+              <td></td>
             </tr>
             <tr>
               <td><b>Checkins:</b></td>
-              <td>{{ show.stats.checkins }}</td>
+              <td></td>
             </tr>
             <tr>
               <td><b>In collection:</b></td>
-              <td>{{ show.stats.collection }}</td>
+              <td>{{ stats.collection }}</td>
             </tr>
           </table>
 
           <table>
             <tr>
               <td><b>Votes:</b></td>
-              <td>{{ show.ratings.votes }}</td>
+              <td>{{ show.votes }}</td>
             </tr>
             <tr>
               <td><b>Percentage:</b></td>
-              <td>{{ show.ratings.percentage }}</td>
+              <td>{{ show.rating|round(2) }}%</td>
             </tr>
             <tr>
               <td><b>Loved:</b></td>
-              <td>{{ show.ratings.loved }}</td>
+              <td></td>
             </tr>
             <tr>
               <td><b>Hated:</b></td>
-              <td>{{ show.ratings.hated }}</td>
+              <td></td>
             </tr>
           </table>
         </div>
