@@ -26,7 +26,7 @@
         >
           <div
             class="goto_{{ type[:-1]|lower }} addloading"
-            data-id="{{ item.show.ids.tvdb }}"
+            data-id="{{ item.show.ids.slug }}"
           >
             <img alt="" src="{{ item.show.images.poster.thumb }}" height="141" width="95"/>
   
@@ -84,7 +84,7 @@
   		  >
     			<div
     			  class="goto_{{ type[:-1]|lower }} addloading"
-    				data-id="{{ item.movie.ids.imdb }}"
+    				data-id="{{ item.movie.ids.slug }}"
     			>
     			  <img alt="" src="{{ item.movie.images.poster.thumb }}" height="141" width="95"/>
     
