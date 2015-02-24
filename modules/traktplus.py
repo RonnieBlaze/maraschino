@@ -547,27 +547,32 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
 
     if type == 'episode':
         api = '/show/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
+        stat_api = '/show/%s/seasons/%s/episodes/%s/stats' % (id, season, episode)
     elif type == 'show':
         api = '/shows/%s?extended=full,images' % (id)
+        stat_api = '/shows/%s/stats' % (id)
     else:
         api = '/movies/%s?extended=full,images' % (id)
-        
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-    
+        stat_api = '/movies/%s/stats' % (id)
+
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        trakt = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
-
+    
+    try:
+        trakt_stat = trak_api(stat_api, oauth=True)
+    except Exception as e:
+        trakt_exception(e)
+        return render_template('traktplus/trakt-base.html', message=e)
+        
     if type != 'episode':
-        trakt['images']['poster'] = cache_image(trakt['images']['poster'], type + 's')
-        if type == 'show':
-            trakt['first_aired'] = datetime.datetime.fromtimestamp(int(trakt['first_aired'])).strftime('%B %d, %Y')
-    else:
-        trakt['episode']['first_aired'] = datetime.datetime.fromtimestamp(int(trakt['episode']['first_aired'])).strftime('%B %d, %Y')
+        trakt['images']['poster']['thumb'] = cache_image(trakt['images']['poster']['thumb'], type + 's')
+        trakt['rating'] = trakt['rating'] * 10
+        if type == 'show' or type == 'episode':
+            trakt['first_aired'] = datetime.datetime.strptime( trakt['first_aired'], "%Y-%m-%dT%H:%M:%S.000Z" ).strftime('%B %d, %Y')
+            trakt['airs']['time'] = datetime.datetime.strptime(trakt['airs']['time'], '%H:%M').time().strftime('%I:%M %p')
 
     while THREADS:
         time.sleep(1)
@@ -580,18 +585,21 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
             episode=trakt,
             type=type,
             title=trakt['episode']['title'],
+            stats=trakt_stat,
             )
     elif type == 'show':
         return render_template('traktplus/trakt-show.html',
             show=trakt,
             type=type,
             title=trakt['title'],
+            stats=trakt_stat,
             )
     else:
         return render_template('traktplus/trakt-movie.html',
             movie=trakt,
             type=type,
             title=trakt['title'],
+            stats=trakt_stat,
             )
 
 
