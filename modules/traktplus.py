@@ -5,7 +5,7 @@ from maraschino.tools import get_setting_value, requires_auth, create_dir, downl
 from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
 
 TRAKT_TOKEN = {}
-
+SYNC = {}
 def trak_api(api, body={}, head={}, oauth=False ,dev=False):
     global TRAKT_TOKEN      
     url='https://api-v2launch.trakt.tv'
@@ -40,7 +40,7 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
 
 
 def trakt_apitoken():
-    global TRAKT_TOKEN
+    global TRAKT_TOKEN, SYNC
     username = get_setting_value('trakt_username')
 
     if not username in TRAKT_TOKEN:
@@ -53,6 +53,116 @@ def trakt_apitoken():
             }
             token = trak_api(api, body=credentials)
             TRAKT_TOKEN.update({username:token['token']})
+            SYNC = read_sync()
+
+def read_sync():
+    username = get_setting_value('trakt_username')
+    file_path = '%s/cache/trakt/sync.json' % DATA_DIR
+    if os.path.isfile(file_path):
+        data = open(file_path)
+        data_string = data.read()
+        data.close()
+        json_data = json.JSONDecoder().decode(data_string)
+        if not username in json_data:
+            logger.log('TRAKT :: %s not found in %s' % (username, file_path), 'DEBUG')
+            json_data = {username: {'watched': {'modified': '', 'trakt' : []},'collection': {'modified': '','trakt': []},'watchlist':{'modified':'','trakt':[]}}}
+    else:
+        logger.log('TRAKT :: file %s not found' % file_path, 'DEBUG')
+        json_data = {username: {'watched': {'modified': '', 'trakt' : []},'collection': {'modified': '','trakt': []},'watchlist':{'modified':'','trakt':[]}}}
+
+    return json_data
+
+def update_sync(api_urls):
+    global SYNC
+    username = get_setting_value('trakt_username')
+    file_path = '%s/cache/trakt/sync.json' % DATA_DIR
+
+    print 'entering update_sync'
+    print username, file_path
+
+    for api in api_urls:
+        key = api.split('/')[2]
+        type = api.split('/')[3][:-1]
+        try:
+            response = trak_api(api, oauth=True)
+        except Exception as e:
+            trakt_exception(e)
+            response = {}
+        if response:
+            if type == 'show':
+                SYNC[username][key]['trakt'] = []
+            for items in response:
+                value = items[type]['ids']['trakt']
+                SYNC[username][key]['trakt'].append(value)
+
+    try:
+        with open(file_path, 'w') as outfile:
+            json.dump(SYNC, outfile)
+    except Exception as e:
+        print e
+    outfile.close
+
+
+def sync_url():
+    global SYNC
+    username = get_setting_value('trakt_username')
+    api = '/sync/last_activities'
+    api_urls=[]
+
+    try:
+        response = trak_api(api, oauth=True, dev=True)
+    except Exception as e:
+        print e
+        sleep(10)
+        try:
+            response = trak_api(api, oauth=True)
+        except Exception as e:
+            print e
+            return False
+
+    if not SYNC[username]['watched']['modified']:
+        SYNC[username]['watched']['modified'] = '1950-01-01T00:00:00.000Z'
+    lastupdate = datetime.datetime.strptime( SYNC[username]['watched']['modified'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+    currentmovie = datetime.datetime.strptime( response['movies']['watched_at'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+    currentshow = datetime.datetime.strptime( response['episodes']['watched_at'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+
+    if lastupdate < currentmovie or lastupdate < currentshow:
+        api_urls.append('/sync/watched/shows')
+        api_urls.append('/sync/watched/movies')
+        if currentmovie < currentshow:
+            SYNC[username]['watched']['modified'] = currentshow.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        else:
+            SYNC[username]['watched']['modified'] = currentmovie.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    if not SYNC[username]['collection']['modified']:
+        SYNC[username]['collection']['modified'] = '1950-01-01T00:00:00.000Z'
+    lastupdate = datetime.datetime.strptime( SYNC[username]['collection']['modified'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+    currentmovie = datetime.datetime.strptime( response['movies']['collected_at'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+    currentshow = datetime.datetime.strptime( response['episodes']['collected_at'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+
+    if lastupdate < currentmovie or lastupdate < currentshow:
+        api_urls.append('/sync/collection/shows')
+        api_urls.append('/sync/collection/movies')
+        if currentmovie < currentshow:
+            SYNC[username]['collection']['modified'] = currentshow.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        else:
+            SYNC[username]['collection']['modified'] = currentmovie.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+    if not SYNC[username]['watchlist']['modified']:
+        SYNC[username]['watchlist']['modified'] = '1950-01-01T00:00:00.000Z'
+    lastupdate = datetime.datetime.strptime( SYNC[username]['watchlist']['modified'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+    currentmovie = datetime.datetime.strptime( response['movies']['watchlisted_at'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+    currentshow = datetime.datetime.strptime( response['episodes']['watchlisted_at'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+
+    if lastupdate < currentmovie or lastupdate < currentshow:
+        api_urls.append('/sync/watchlist/shows')
+        api_urls.append('/sync/watchlist/movies')
+        if currentmovie < currentshow:
+            SYNC[username]['watchlist']['modified'] = currentshow.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        else:
+            SYNC[username]['watchlist']['modified'] = currentmovie.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            
+    return api_urls
 
 def trakt_exception(e):
     logger.log('TRAKT :: EXCEPTION -- %s' % e, 'DEBUG')
@@ -67,12 +177,6 @@ def get_list(content, media_type):
     
     return list
 
-def sync_matching(media_type, json_parm, list1=[], list2=[]):
-    for items in list1:
-          for matches in list2:
-                if items[media_type]['ids']['trakt'] == matches[media_type]['ids']['trakt']:
-                      items[media_type].update({json_parm:True})
-                      
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'shows'))
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'movies'))
 
@@ -175,53 +279,65 @@ def xhr_trakt_recommendations(type=None, mobile=False):
 @app.route('/xhr/trakt/trending/<type>')
 @requires_auth
 def xhr_trakt_trending(type=None, mobile=False):
+    username = get_setting_value('trakt_username')
+    
     if not type:
         type = get_setting_value('trakt_default_media')
 
     trakt_apitoken()
+    api_urls = sync_url()
+    if api_urls:
+        update_sync(api_urls)
+    
     limit = int(get_setting_value('trakt_trending_limit'))
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
 
     api = '/%s/trending?extended=full,images&page=1&limit=%s' % (type, limit)
     
     try:
-        trakt = trak_api(api, {},{}, False, False)
+        trakt = trak_api(api)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
-        
-    try:
-        sync_matching( type[:-1], 'in_collection', trakt, get_list('collection', type) )
-    except Exception as e:
-        trakt_exception(e)
-        return render_template('traktplus/trakt-base.html', message=e)
-
-    try:
-        sync_matching( type[:-1], 'watched', trakt, get_list('watched', type) )
-    except Exception as e:
-        trakt_exception(e)
-        return render_template('traktplus/trakt-base.html', message=e)
-
-    try:
-        sync_matching( type[:-1], 'in_watchlist', trakt, get_list('watchlist', type) )
-    except Exception as e:
-        trakt_exception(e)
-        return render_template('traktplus/trakt-base.html', message=e)
-
+    
     if mobile:
         return trakt
-    
-    if len(trakt) > limit:
-        trakt = trakt[:limit]
 
     if type == 'shows':
           for item in trakt:
                 item['show']['images']['poster']['thumb'] = cache_image(item['show']['images']['poster']['thumb'], type)
                 item['show']['rating'] = int(item['show']['rating'] * 10)
+                for ids in SYNC[username]['watched']['trakt']:
+                    if ids == item['show']['ids']['trakt']:
+                        item['show'].update({'watched':True})
+                        break
+                for ids in SYNC[username]['collection']['trakt']:
+                    if ids == item['show']['ids']['trakt']:
+                        item['show'].update({'in_collection':True})
+                        break
+                for ids in SYNC[username]['watchlist']['trakt']:
+                    if ids == item['show']['ids']['trakt']:
+                        item['show'].update({'in_watchlist':True})
+                        break
     else:
           for item in trakt:
                 item['movie']['images']['poster']['thumb'] = cache_image(item['movie']['images']['poster']['thumb'], type)
                 item['movie']['rating'] = int(item['movie']['rating'] * 10)
+                for ids in SYNC[username]['watched']['trakt']:
+                    if ids == item['movie']['ids']['trakt']:
+                        print 'matched', item['movie']['ids']['slug']
+                        item['movie'].update({'watched':True})
+                        break
+                for ids in SYNC[username]['collection']['trakt']:
+                    if ids == item['movie']['ids']['trakt']:
+                        print 'matched', item['movie']['ids']['slug']
+                        item['movie'].update({'watched':True})
+                        break
+                for ids in SYNC[username]['watchlist']['trakt']:
+                    if ids == item['movie']['ids']['trakt']:
+                        print 'matched', item['movie']['ids']['slug']
+                        item['movie'].update({'in_watchlist':True})
+                        break
     while THREADS:
         time.sleep(1)
 
@@ -230,7 +346,6 @@ def xhr_trakt_trending(type=None, mobile=False):
         type=type.title(),
         title='Trending',
     )
-
 
 @app.route('/xhr/trakt/activity')
 @app.route('/xhr/trakt/activity/<type>')
@@ -253,7 +368,6 @@ def xhr_trakt_activity(type='friends', mobile=False):
         type=type.title(),
         title='Activity',
     )
-
 
 @app.route('/xhr/trakt/friends')
 @app.route('/xhr/trakt/friends/<user>')
@@ -544,6 +658,10 @@ def xhr_trakt_calendar(type, mobile=False):
 @app.route('/xhr/trakt/summary/<type>/<id>/<season>/<episode>')
 @requires_auth
 def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
+    username = get_setting_value('trakt_username')
+    api_urls = sync_url()
+    if api_urls:
+        update_sync(api_urls)
 
     if type == 'episode':
         api = '/show/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
@@ -570,6 +688,16 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
     if type != 'episode':
         trakt['images']['poster']['thumb'] = cache_image(trakt['images']['poster']['thumb'], type + 's')
         trakt['rating'] = trakt['rating'] * 10
+        for ids in SYNC[username]['watched']['trakt']:
+            if ids == trakt['ids']['trakt']:
+               trakt.update({'watched': True})
+        for ids in SYNC[username]['collection']['trakt']:
+            if ids == trakt['ids']['trakt']:
+               trakt.update({'in_collection': True})
+        for ids in SYNC[username]['watchlist']['trakt']:
+            if ids == trakt['ids']['trakt']:
+               trakt.update({'in_watchlist': True})
+
         if type == 'show' or type == 'episode':
             trakt['first_aired'] = datetime.datetime.strptime( trakt['first_aired'], "%Y-%m-%dT%H:%M:%S.000Z" ).strftime('%B %d, %Y')
             trakt['airs']['time'] = datetime.datetime.strptime(trakt['airs']['time'], '%H:%M').time().strftime('%I:%M %p')
