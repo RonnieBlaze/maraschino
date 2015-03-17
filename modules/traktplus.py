@@ -374,25 +374,51 @@ def xhr_trakt_activity(type='friends', mobile=False):
 @requires_auth
 def xhr_trakt_friends(user=None, mobile=False):
     logger.log('TRAKT :: Fetching friends list', 'INFO')
-    pending = []
+    pending = None
+    responses = []
+    
     if not user:
-        friends_api = '/users/%s/friends' % (get_setting_value('trakt_username'))
+        friends_api = '/users/me/friends?extended=full,images'
         pending_api = '/users/requests'
     else:
-        friends_api = '/users/%s/friends' % (user)
-    
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
+        friends_api = '/users/%s/friends?extended=full,images' % (user)
 
     try:
-        friends = trak_api(friends_api, {}, {}, False, True)
+        friends = trak_api(friends_api, oauth=True)
         if not user:
-            pending = trak_api(pending_api, {}, headers, True, True)
+            pending = trak_api(pending_api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
+    
+    for friend in friends:
+        api = ['/users/%s/history/movies' % friend['user']['username'],
+               '/users/%s/history/episodes' % friend['user']['username'],
+               '/users/%s/watching' % friend['user']['username'] ]
+        for url in api:
+            try:
+                response = trak_api(url, oauth=True)
+            except Exception as e:
+                trakt_exception(e)
+                response = None
+            responses.append(response)
+            
+        if responses[0] and responses[1]:
+            history = sorted(responses[0] + responses[1], key=itemgetter('watched_at'), reverse=True)
+        else:
+            if responses[0]:
+                history = responses[0]
+            elif responses[1]:
+                history = responses[1]
+            else:
+                history = None
+        if history:
+            friend.update({'watched':history[:1]})
+        if responses[2]:
+            friend.update({'watching':responses[2]})
 
+        responses = []
+    
     if mobile:
         return friends
 
