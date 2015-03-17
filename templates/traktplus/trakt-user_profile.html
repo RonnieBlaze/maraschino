@@ -5,34 +5,43 @@
 {% block trakt_content %}
 
 <div class="inner">
-
-    {% if profile.status == 'error' %}
-
-      <p>{{ profile.message }}</p>
-
-    {% else %}
-
         <div class="profile">
           <div class="user_info">
-            <img src="{{ profile.avatar }}"/>
+            <img src="{{ profile.images.avatar.full }}"/>
             <h2>{{ profile.username }}</h2>
 
             <table>
               <tr>
                 <td><b>Full Name:</b></td>
-                <td>{{ profile.full_name }}</td>
+                {% if profile.name %}
+                  <td>{{ profile.name }}</td>
+                {% else %}
+                  <td>None</td>
+                {% endif %}
               </tr>
               <tr>
                 <td><b>Location:</b></td>
-                <td>{{ profile.location }}</td>
+                {% if profile.location %}
+                  <td>{{ profile.location }}</td>
+                {% else %}
+                  <td>None</td>
+                {% endif %}
               </tr>
               <tr>
                 <td><b>Age:</b></td>
-                <td>{{ profile.age }}</td>
+                {% if profile.age %}
+                  <td>{{ profile.age }}</td>
+                {% else %}
+                  <td>None</td>
+                {% endif %}
               </tr>
               <tr>
                 <td><b>Gender:</b></td>
-                <td>{{ profile.gender }}</td>
+                {% if profile.gender %}
+                  <td>{{ profile.gender }}</td>
+                {% else %}
+                  <td>None</td>
+                {% endif %}
               </tr>
             </table>
           </div>
@@ -45,24 +54,24 @@
             <a class="button addloading" data-xhr_url="progress/{{ profile.username }}">Progress</a>
           </div>
 
-          {% if profile.watching %}
+          {% if scrobble != None %}
             <div class="watching">
               <b>Currently watching:</b>
-              {% if profile.watching.type == 'movie' %}
-                <span class="link goto_movie addloading" data-id="{{ profile.watching.movie.imdb_id }}">
-                  {{ profile.watching.movie.title }} ({{ profile.watching.movie.year }})
+              {% if scrobble.type == 'movie' %}
+                <span class="link goto_movie addloading" data-id="{{ scrobble.movie.ids.slug }}">
+                  {{ scrobble.movie.title }} ({{ scrobble.movie.year }})
                 </span>
               {% else %}
-                <span class="link goto_show addloading" data-id="{{ profile.watching.show.imdb_id }}">
-                  {{ profile.watching.show.title }}
+                <span class="link goto_show addloading" data-id="{{ scrobble.show.ids.slug }}">
+                  {{ scrobble.show.title }}
                   </span>
                   <span
                     class="goto_episode list_link addloading" 
-                    data-id="{{ profile.watching.show.imdb_id }}" 
-                    data-season="{{ profile.watching.episode.season }}"
-                    data-episode="{{ profile.watching.episode.number }}"
+                    data-id="{{ scrobble.show.ids.slug }}" 
+                    data-season="{{ scrobble.episode.season }}"
+                    data-episode="{{ scrobble.episode.number }}"
                   >
-                  {{ profile.watching.episode.season }}x{{ profile.watching.episode.number }} - {{ profile.watching.episode.title }}
+                  {{ scrobble.episode.season }}x{{ scrobble.episode.number }} - {{ scrobble.episode.title }}
                 </span>
               {% endif %}
               <br>
@@ -71,16 +80,16 @@
 
           <div class="watched">
             <b>Movies:</b>
-            <span>Collection: {{ profile.stats.movies.collection }}</span>
-            <span>Watched: {{ profile.stats.movies.watched }}</span><br>
+            <span>Collection: {{ stats.total_m }}</span>
+            <span>Watched: {{ stats.watched_m }}</span><br>
 
             <div class="bar" title="{{ movies_progress }}%">
               <div class="inner" style="width: {{ movies_progress }}%;"></div>
             </div>
             <br>
             <b>Episodes:</b>
-            <span>Collection: {{ profile.stats.episodes.collection }}</span>
-            <span>Watched: {{ profile.stats.episodes.watched }}</span><br>
+            <span>Collection: {{ stats.total_e }}</span>
+            <span>Watched: {{ stats.watched_e }}</span><br>
 
             <div class="bar" title="{{ episodes_progress }}%">
               <div class="inner" style="width: {{ episodes_progress }}%;"></div>
@@ -94,17 +103,17 @@
 
           <div class="recently_watched hidden">
             <table width="100%">
-              {% for item in profile.watched %}
+              {% for item in history %}
                 <tr>
                   <td width="65%">
-                    {% if item.type == 'episode' %}
+                    {% if 'episode' in item %}
                       <span>
-                        <span class="goto_show link addloading" data-id="{{ item.show.imdb_id }}">
+                        <span class="goto_show link addloading" data-id="{{ item.show.ids.slug }}">
                           {{ item.show.title }}
                         </span>
                         <span
                           class="goto_episode list_link addloading" 
-                          data-id="{{ item.show.imdb_id }}" 
+                          data-id="{{ item.show.ids.slug }}" 
                           data-season="{{ item.episode.season }}"
                           data-episode="{{ item.episode.number }}"
                         >
@@ -112,20 +121,17 @@
                         </span>
                       </span>
                     {% else %}
-                      <span class="link goto_movie addloading" data-id="{{ item.movie.imdb_id }}">
+                      <span class="link goto_movie addloading" data-id="{{ item.movie.ids.slug }}">
                         {{ item.movie.title }} ({{ item.movie.year }})
                       </span>
                     {% endif %}
                   </td>
-                  <td width="35%" align="right">{{ item.watched }}</td>
+                  <td width="35%" align="right">{{ item.watched_at }}</td>
                 </tr>
               {% endfor %}
           </ul>
           </div>
         </div>
-
-    {% endif %}
-
 </div>
 
 {% endblock %}
