@@ -20,13 +20,13 @@
           data-type="{{ type[:-1]|lower }}"
           data-title="{{ item.title }}"
           data-year="{{ item.year }}"
-          data-imdb_id="{{ item.imdb_id }}"
+          data-imdb_id="{{ item.ids.imdb }}"
           {% if type == 'Movies' %}
-            data-id="{{ item.imdb_id }}"
-            data-tmdb_id="{{ item.tmdb_id }}"
+            data-id="{{ item.ids.slug }}"
+            data-tmdb_id="{{ item.ids.tmdb }}"
           {% else %}
-            data-id="{{ item.tvdb_id }}"
-            data-tvdb_id="{{ item.tvdb_id }}"
+            data-id="{{ item.ids.slug }}"
+            data-tvdb_id="{{ item.ids.tvdb }}"
           {% endif %}
         >
           <div class="inner">
@@ -38,13 +38,19 @@
             </div>
 
             <h3>{{ item.title }}</h3>
-            <img class="artwork" src="{{ item.poster }}"/>
-            <p class="info">Year: {{ item.year }}, Rating: {{ item.ratings.percentage }}%</p>
+            {% if item.images.poster.thumb %}
+              <img class="artwork" src="{{ item.images.poster.thumb }}"/>
+            {% else %}
+              <img glass"artwork" src="{{ url_for('static', filename='images/trakt/poster.png') }}"
+            {% endif %}
+            <p class="info">Year: {{ item.year }}, Rating: {{ item.rating }}%</p>
             <p class="overview">
-              <span class="truncated">{{ item.overview|truncate(400, false) }}</span>
-              <span class="expanded" style="display: none;">{{ item.overview }}</span>
-              {% if item.overview|count > 400 %}
-                <a class="expand" href="#" title="More">[+]</a>
+              {% if item.overview %}
+                <span class="truncated">{{ item.overview|truncate(400, false) }}</span>
+                <span class="expanded" style="display: none;">{{ item.overview }}</span>
+                {% if item.overview|count > 400 %}
+                  <a class="expand" href="#" title="More">[+]</a>
+                {% endif %}
               {% endif %}
             </p>
           </div>
