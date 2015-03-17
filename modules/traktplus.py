@@ -248,11 +248,8 @@ def xhr_trakt_recommendations(type=None, mobile=False):
 
     api = '/recommendations/%s?extended=full,images' % (type)
 
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
     try:
-        recommendations = trak_api(api, {}, header, True, False)
+        recommendations = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
@@ -260,7 +257,8 @@ def xhr_trakt_recommendations(type=None, mobile=False):
     random.shuffle(recommendations)
 
     for item in recommendations:
-        item['poster'] = cache_image(item['images']['poster'], type)
+        if item['images']['poster']['thumb']:
+            item['images']['poster']['thumb'] = cache_image(item['images']['poster']['thumb'], type)
 
     while THREADS:
         time.sleep(1)
