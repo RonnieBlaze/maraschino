@@ -453,53 +453,75 @@ def xhr_trakt_friend_action(action, user):
 @requires_auth
 def xhr_trakt_profile(user=None, mobile=False):
     if not user:
-        user = get_setting_value('trakt_username')
+        user = 'me'
+        username = get_setting_value('trakt_username')
+    else:
+        username = user
 
     logger.log('TRAKT :: Fetching %s\'s profile information' % user, 'INFO')
-
-    api = '/users/%s' % (user)
-
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
+    counts = {'collected_e': 0, 'collected_w': 0, 'watched_m': 0, 'total_m': 0, 'watched_e': 0, 'total_e': 0} 
+    api_urls = ['/users/%s?extended=full,images' % (user), '/users/%s/history/movies?extended=full,images&page=1&limit=5' % (user),
+                '/users/%s/history/episodes?extended=full,images&page=1&limit=5' % (user), '/users/%s/watching' % (user) ,
+                '/sync/collection/movies', '/sync/collection/shows', '/sync/watched/shows']
+    responses = []
+    for url in api_urls:
+        try:
+            response = trak_api(url, oauth=True)
+        except Exception as e:
+            trakt_exception(e)
+        
+        responses.append(response)
+        response = None
+    
+    for collection in responses[5]:
+        for s in collection['seasons']:
+            counts['total_e'] += len(s['episodes'])
+        for watch in responses[6]:
+            if watch['show']['ids']['trakt'] == collection['show']['ids']['trakt']:
+                for s in collection['seasons']:
+                    counts['collected_e'] += len(s['episodes'])
+                for s in watch['seasons']:
+                    counts['collected_w'] += len(s['episodes'])
+                if counts['collected_e'] > counts['collected_w']:
+                    counts['watched_e'] += counts['collected_w']
+                else:
+                    counts['watched_e'] += counts['collected_e']
+                counts['collected_e'] = 0
+                counts['collected_w'] = 0
+    for collection in responses[4]:
+        for id in SYNC[username]['watched']['trakt']:
+            if id == collection['movie']['ids']['trakt']:
+                counts['watched_m'] += 1
+                break
 
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        movies_progress = 100 * float(counts['watched_m']) / float(counts['total_m'])
     except Exception as e:
-        trakt_exception(e)
-        return render_template('traktplus/trakt-base.html', message=e)
+       print e
+       movies_progress = 0
+    try:
+       episodes_progress = 100 * float(counts['watched_e']) / float(counts['total_e'])
+    except Exception as e:
+       print e
+       episodes_progress = 0
 
-    if 'status' in trakt and trakt['status'] == 'error':
-        logger.log('TRAKT :: Error accessing user profile', 'INFO')
-        movies_progress = 0
-        episodes_progress = 0
+    try:
+        history = sorted(responses[1] + responses[2][:5], key=itemgetter('watched_at'), reverse=True)
+    except Exception as e:
+        print 'Exception', e
 
-    else:
-        for item in trakt['watched']:
-            item['watched'] = time.ctime(int(item['watched']))
-
-        movies = trakt['stats']['movies']
-
-        try:
-            movies_progress = 100 * float(movies['watched_unique']) / float(movies['collection'])
-        except:
-            movies_progress = 0
-
-        episodes = trakt['stats']['episodes']
-
-        try:
-            episodes_progress = 100 * float(episodes['watched_unique']) / float(episodes['collection'])
-        except:
-            episodes_progress = 0
 
     if mobile:
         return trakt
 
     return render_template('traktplus/trakt-user_profile.html',
-        profile=trakt,
+        history=history,
+        scrobble=responses[3],
+        profile=responses[0],
         user=user,
         movies_progress=int(movies_progress),
         episodes_progress=int(episodes_progress),
+        stats=counts,
         title='Profile',
     )
 
