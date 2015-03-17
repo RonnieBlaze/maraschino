@@ -672,29 +672,30 @@ def xhr_trakt_rated(user, type=None, mobile=False):
 def xhr_trakt_calendar(type, mobile=False):
     logger.log('TRAKT :: Fetching %s calendar' % type, 'INFO')
     today = time.strftime('%Y-%m-%d')
-    username = get_setting_value('trakt_username')
 
-    api = '/calendars/%s/%s/7' & (type, today)
+    if type != 'Premieres':
+        api = '/calendars/shows/%s/6?extended=full' % today
+        auth = False
     if type == 'my shows':
-        header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
         auth = True
     else:
-        header = {}
+        api = '/calendars/shows/premieres/%s/6?extended=full' % today
         auth = False
 
     try:
-        trakt = trak_api(api, {}, header, auth, True)
+        trakt = trak_api(api, {}, oauth=auth)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
 
+    dates = trakt.keys()
+    dates.sort()
     if mobile:
         return trakt
 
     return render_template('traktplus/trakt-calendar.html',
         calendar=trakt,
+        dates=dates,
         type=type.title(),
         title='Calendar',
     )
