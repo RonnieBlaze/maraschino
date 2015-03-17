@@ -19,17 +19,17 @@
 
 <div class="calendar">
   <ul>
-    {% for day in calendar %}
-      <span class="date"><b>{{day.episodes.0.show.air_day }} {{ day.date }}</b></span>
-      {% for item in day.episodes %}
+    {% for day in dates %}
+      <span class="date"><b>{{ calendar[day][0]['airs_at'] }}</b></span>
+      {% for item in calendar[day] %}
         <li>
-          <span class="goto_show list_link addloading" data-id="{{ item.show.imdb_id }}">
+          <span class="goto_show list_link addloading" data-id="{{ item.show.ids.slug }}">
             {{ item.show.title }}
           </span>
           {% if type != 'Premieres'%}
             <span
               class="goto_episode list_link addloading" 
-              data-id="{{ item.show.imdb_id }}" 
+              data-id="{{ item.show.ids.slug }}" 
               data-season="{{ item.episode.season }}"
               data-episode="{{ item.episode.number }}"
             >
@@ -38,7 +38,7 @@
           {% else %}
             Season {{ item.episode.season }}
           {% endif %}
-          <span class="time">{{ item.show.air_time }}</span>
+          <span class="time">{{ item.show.airs.time }}</span>
         </li>
 	    {% endfor %}
     {% endfor %}
