@@ -315,7 +315,6 @@ def xhr_trakt_trending(type=None, mobile=False):
     if type == 'shows':
           for item in trakt:
                 item['show']['images']['poster']['thumb'] = cache_image(item['show']['images']['poster']['thumb'], type)
-                item['show']['rating'] = int(item['show']['rating'] * 10)
                 for ids in SYNC[username]['watched']['trakt']:
                     if ids == item['show']['ids']['trakt']:
                         item['show'].update({'watched':True})
@@ -331,7 +330,6 @@ def xhr_trakt_trending(type=None, mobile=False):
     else:
           for item in trakt:
                 item['movie']['images']['poster']['thumb'] = cache_image(item['movie']['images']['poster']['thumb'], type)
-                item['movie']['rating'] = int(item['movie']['rating'] * 10)
                 for ids in SYNC[username]['watched']['trakt']:
                     if ids == item['movie']['ids']['trakt']:
                         print 'matched', item['movie']['ids']['slug']
@@ -748,7 +746,6 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
         
     if type != 'episode':
         trakt['images']['poster']['thumb'] = cache_image(trakt['images']['poster']['thumb'], type + 's')
-        trakt['rating'] = trakt['rating'] * 10
         for ids in SYNC[username]['watched']['trakt']:
             if ids == trakt['ids']['trakt']:
                trakt.update({'watched': True})
@@ -758,11 +755,7 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
         for ids in SYNC[username]['watchlist']['trakt']:
             if ids == trakt['ids']['trakt']:
                trakt.update({'in_watchlist': True})
-
-        if type == 'show' or type == 'episode':
-            trakt['first_aired'] = datetime.datetime.strptime( trakt['first_aired'], "%Y-%m-%dT%H:%M:%S.000Z" ).strftime('%B %d, %Y')
-            trakt['airs']['time'] = datetime.datetime.strptime(trakt['airs']['time'], '%H:%M').time().strftime('%I:%M %p')
-
+               
     while THREADS:
         time.sleep(1)
 
