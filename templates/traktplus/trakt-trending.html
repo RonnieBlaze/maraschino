@@ -62,7 +62,7 @@
           </div>
           <div class="footer">
             <div class="item_info">
-            <span class="percentage">{{ item.show.rating }}%</span>
+            <span class="percentage">{{ (item.show.rating * 10)|round|int }}%</span>
             <span class="votes">{{ item.show.votes }} votes</span>
             </div>
             <div class="item_rate" align="center">
@@ -120,7 +120,7 @@
     			</div>
   			  <div class="footer">
     			  <div class="item_info">
-    			    <span class="percentage">{{ item.movie.rating }}%</span>
+    			    <span class="percentage">{{ (item.movie.rating * 10)|round|int }}%</span>
     			    <span class="votes">{{ item.movie.votes }} votes</span>
     			  </div>
     			  <div class="item_rate" align="center">
