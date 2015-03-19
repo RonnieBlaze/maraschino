@@ -489,6 +489,9 @@ def xhr_trakt_profile(user=None, mobile=False):
                     counts['watched_e'] += counts['collected_e']
                 counts['collected_e'] = 0
                 counts['collected_w'] = 0
+    
+    counts['total_m'] = len(responses[4])
+    
     for collection in responses[4]:
         for id in SYNC[username]['watched']['trakt']:
             if id == collection['movie']['ids']['trakt']:
