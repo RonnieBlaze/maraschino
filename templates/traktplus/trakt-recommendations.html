@@ -43,7 +43,7 @@
             {% else %}
               <img glass"artwork" src="{{ url_for('static', filename='images/trakt/poster.png') }}"
             {% endif %}
-            <p class="info">Year: {{ item.year }}, Rating: {{ item.rating }}%</p>
+            <p class="info">Year: {{ item.year }}, Rating: {{ (item.rating * 10)|round(1) }}%</p>
             <p class="overview">
               {% if item.overview %}
                 <span class="truncated">{{ item.overview|truncate(400, false) }}</span>
