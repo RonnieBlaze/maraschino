@@ -20,7 +20,7 @@
 <div class="calendar">
   <ul>
     {% for day in dates %}
-      <span class="date"><b>{{ calendar[day][0]['airs_at'] }}</b></span>
+      <span class="date"><b>{{ calendar[day][0]['airs_at']|format_date('day') }}</b></span>
       {% for item in calendar[day] %}
         <li>
           <span class="goto_show list_link addloading" data-id="{{ item.show.ids.slug }}">
@@ -38,7 +38,7 @@
           {% else %}
             Season {{ item.episode.season }}
           {% endif %}
-          <span class="time">{{ item.show.airs.time }}</span>
+          <span class="time">{{ item.show.airs.time|format_date('time') }}</span>
         </li>
 	    {% endfor %}
     {% endfor %}
