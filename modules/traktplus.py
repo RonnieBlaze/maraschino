@@ -90,11 +90,10 @@ def update_sync(api_urls):
             trakt_exception(e)
             response = {}
         if response:
-            if type == 'show':
-                SYNC[username][key]['trakt'] = []
             for items in response:
-                value = items[type]['ids']['trakt']
-                SYNC[username][key]['trakt'].append(value)
+                trakt_id = type[:1] + str( items[type]['ids']['trakt'] )
+                if trakt_id not in SYNC[username][key]['trakt']:
+                    SYNC[username][key]['trakt'].append(trakt_id)
 
     try:
         with open(file_path, 'w') as outfile:
@@ -316,33 +315,30 @@ def xhr_trakt_trending(type=None, mobile=False):
           for item in trakt:
                 item['show']['images']['poster']['thumb'] = cache_image(item['show']['images']['poster']['thumb'], type)
                 for ids in SYNC[username]['watched']['trakt']:
-                    if ids == item['show']['ids']['trakt']:
+                    if ids == 's' + str( item['show']['ids']['trakt'] ):
                         item['show'].update({'watched':True})
                         break
                 for ids in SYNC[username]['collection']['trakt']:
-                    if ids == item['show']['ids']['trakt']:
+                    if ids == 's' + str( item['show']['ids']['trakt'] ):
                         item['show'].update({'in_collection':True})
                         break
                 for ids in SYNC[username]['watchlist']['trakt']:
-                    if ids == item['show']['ids']['trakt']:
+                    if ids == 's' + str( item['show']['ids']['trakt'] ):
                         item['show'].update({'in_watchlist':True})
                         break
     else:
           for item in trakt:
                 item['movie']['images']['poster']['thumb'] = cache_image(item['movie']['images']['poster']['thumb'], type)
                 for ids in SYNC[username]['watched']['trakt']:
-                    if ids == item['movie']['ids']['trakt']:
-                        print 'matched', item['movie']['ids']['slug']
+                    if ids == 'm' + str( item['movie']['ids']['trakt'] ):
                         item['movie'].update({'watched':True})
                         break
                 for ids in SYNC[username]['collection']['trakt']:
-                    if ids == item['movie']['ids']['trakt']:
-                        print 'matched', item['movie']['ids']['slug']
-                        item['movie'].update({'watched':True})
+                    if ids == 'm' + str( item['movie']['ids']['trakt'] ):
+                        item['movie'].update({'in_collection':True})
                         break
                 for ids in SYNC[username]['watchlist']['trakt']:
-                    if ids == item['movie']['ids']['trakt']:
-                        print 'matched', item['movie']['ids']['slug']
+                    if ids == 'm' + str( item['movie']['ids']['trakt'] ):
                         item['movie'].update({'in_watchlist':True})
                         break
     while THREADS:
@@ -502,7 +498,7 @@ def xhr_trakt_profile(user=None, mobile=False):
     
     for collection in responses[4]:
         for id in SYNC[username]['watched']['trakt']:
-            if id == collection['movie']['ids']['trakt']:
+            if id == 'm' + str( collection['movie']['ids']['trakt'] ):
                 counts['watched_m'] += 1
                 break
 
@@ -747,13 +743,16 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
     if type != 'episode':
         trakt['images']['poster']['thumb'] = cache_image(trakt['images']['poster']['thumb'], type + 's')
         for ids in SYNC[username]['watched']['trakt']:
-            if ids == trakt['ids']['trakt']:
+            trakt_id = type[:1] + str( trakt['ids']['trakt'] )
+            if ids == trakt_id:
                trakt.update({'watched': True})
         for ids in SYNC[username]['collection']['trakt']:
-            if ids == trakt['ids']['trakt']:
+            trakt_id = type[:1] + str( trakt['ids']['trakt'] )
+            if ids == trakt_id:
                trakt.update({'in_collection': True})
         for ids in SYNC[username]['watchlist']['trakt']:
-            if ids == trakt['ids']['trakt']:
+            trakt_id = type[:1] + str( trakt['ids']['trakt'] )
+            if ids == trakt_id:
                trakt.update({'in_watchlist': True})
                
     while THREADS:
