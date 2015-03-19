@@ -55,7 +55,7 @@
         </div>
         <div class="footer">
           <div class="item_info">
-          <span class="percentage">{{ movie.rating|round|int }}%</span>
+          <span class="percentage">{{ (movie.rating * 10)|round|int }}%</span>
           <span class="votes">{{ movie.votes }} votes</span>
           </div>
           <div class="item_rate" align="center">
@@ -146,7 +146,7 @@
             </tr>
             <tr>
               <td><b>Percentage:</b></td>
-              <td>{{ movie.rating|round(2) }}%</td>
+              <td>{{ (movie.rating *10 )|round(2) }}%</td>
             </tr>
             <tr>
               <td><b>Loved:</b></td>
