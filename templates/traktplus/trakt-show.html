@@ -55,7 +55,7 @@
         </div>
         <div class="footer">
           <div class="item_info">
-          <span class="percentage">{{ show.rating|round|int }}%</span>
+          <span class="percentage">{{ (show.rating * 10)|round|int }}%</span>
           <span class="votes">{{ show.votes }} votes</span>
           </div>
           <div class="item_rate" align="center">
@@ -81,11 +81,11 @@
         </tr>
         <tr>
           <td><b>Airs:</b></td>
-          <td>{{ show.airs.day }}s at {{ show.airs.time }} on {{ show.network }}</td>
+          <td>{{ show.airs.day }}s at {{ show.airs.time|format_date('time') }} on {{ show.network }}</td>
         </tr>
         <tr>
           <td><b>Premiered:</b></td>
-          <td>{{ show.first_aired }}</td>
+          <td>{{ show.first_aired|format_date('date') }}</td>
         </tr>
         <tr>
           <td><b>Runtime:</b></td>
@@ -145,7 +145,7 @@
             </tr>
             <tr>
               <td><b>Percentage:</b></td>
-              <td>{{ show.rating|round(2) }}%</td>
+              <td>{{ (show.rating * 10)|round(2) }}%</td>
             </tr>
             <tr>
               <td><b>Loved:</b></td>
