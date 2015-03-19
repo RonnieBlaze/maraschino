@@ -126,7 +126,7 @@
                       </span>
                     {% endif %}
                   </td>
-                  <td width="35%" align="right">{{ item.watched_at }}</td>
+                  <td width="35%" align="right">{{ item.watched_at|format_date('day') }}</td>
                 </tr>
               {% endfor %}
           </ul>
