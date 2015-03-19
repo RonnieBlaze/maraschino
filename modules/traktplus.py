@@ -3,6 +3,7 @@ import hashlib, urllib2, base64, random, time, datetime, os
 from threading import Thread
 from maraschino.tools import get_setting_value, requires_auth, create_dir, download_image
 from maraschino import logger, app, WEBROOT, DATA_DIR, THREADS
+from operator import itemgetter
 
 TRAKT_TOKEN = {}
 SYNC = {}
