@@ -207,6 +207,16 @@ def cache_image(image, type):
 
     return '%s/cache/trakt/%s/%s' % (WEBROOT, type, filename[1:])
 
+@app.template_filter('format_date')
+def format_date(value, format='date'):
+    if format == 'date':
+        return datetime.datetime.strptime(value[:10], '%Y-%m-%d').strftime('%B %d, %Y')
+    if format == 'day':
+        return datetime.datetime.strptime(value[:10], '%Y-%m-%d').strftime('%A, %B %d, %Y')
+    if format == 'time':
+        return datetime.datetime.strptime(value, '%H:%M').strftime('%I:%M %p').lstrip('0')
+    if format == 'datetime':
+        return datetime.datetime.strptime(value[:23], '%Y-%m-%dT%H:%M:%S.%f').strftime('%A, %B %d at %I:%M %p')
 
 @app.route('/cache/trakt/<type>/<filename>')
 @requires_auth
