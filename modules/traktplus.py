@@ -684,14 +684,14 @@ def xhr_trakt_calendar(type, mobile=False):
     if type != 'Premieres':
         api = '/calendars/shows/%s/6?extended=full' % today
         auth = False
-    if type == 'my shows':
-        auth = True
+        if type == 'my shows':
+            auth = True
     else:
         api = '/calendars/shows/premieres/%s/6?extended=full' % today
         auth = False
 
     try:
-        trakt = trak_api(api, {}, oauth=auth)
+        trakt = trak_api(api, oauth=auth)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
