@@ -18,12 +18,12 @@
   <ul>
     {% for item in library %}
       {% if type == 'Movies' %}
-        <li class="goto_movie addloading" data-id="{{ item.imdb_id }}">
-          {{ item.title }} ({{ item.year }})
+        <li class="goto_movie addloading" data-id="{{ item.movie.ids.slug }}">
+          {{ item.movie.title }} ({{ item.movie.year }})
         </li>
       {% else %}
-        <li class="goto_show addloading" data-id="{{ item.imdb_id }}">
-          {{ item.title }}
+        <li class="goto_show addloading" data-id="{{ item.show.ids.slug }}">
+          {{ item.show.title }}
         </li>
       {% endif %}
     {% endfor %}
