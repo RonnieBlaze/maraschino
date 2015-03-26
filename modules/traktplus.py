@@ -441,13 +441,9 @@ def xhr_trakt_friends(user=None, mobile=False):
 @requires_auth
 def xhr_trakt_friend_action(action, user):
     api = '/users/%s/history/%s' % (action, user)
-    
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-    
+
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        trakt = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return jsonify(status='%s friend failed\n%s' % (action.title(), e))
@@ -576,12 +572,8 @@ def xhr_trakt_library(user, type=None, mobile=False):
     logger.log('TRAKT :: Fetching %s\'s %s library' % (user, type), 'INFO')
     api = '/users/%s/collection/%s' % (user, type)
 
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-    
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        trakt = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
@@ -607,12 +599,8 @@ def xhr_trakt_watchlist(user, type=None, mobile=False):
     logger.log('TRAKT :: Fetching %s\'s %s watchlist' % (user, type), 'INFO')
     api = '/users/%s/watchlist/%s' % (user, type)
     
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        trakt = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
@@ -640,12 +628,8 @@ def xhr_trakt_rated(user, type=None, mobile=False):
     logger.log('TRAKT :: Fetching %s\'s rated %s' % (user, type), 'INFO')
     api = '/users/%s/ratings/%s' % (user, type)
     
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-    
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        trakt = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
@@ -720,10 +704,6 @@ def xhr_trakt_calendar(type, mobile=False):
 @app.route('/xhr/trakt/summary/<type>/<id>/<season>/<episode>')
 @requires_auth
 def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
-    username = get_setting_value('trakt_username')
-    api_urls = sync_url()
-    if api_urls:
-        update_sync(api_urls)
 
     if type == 'episode':
         api = '/show/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
@@ -801,12 +781,8 @@ def xhr_trakt_get_lists(user=None, mobile=False):
     logger.log('TRAKT :: Fetching %s\'s custom lists' % user, 'INFO')
     api = '/user/%s/lists' % (user)
     
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-
     try:
-        trakt = trak_api(api, {}, header, True, True)
+        trakt = trak_api(api, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
@@ -863,10 +839,6 @@ def xhr_trakt_add_to_list():
         
         api = '/users/%s/lists' % (get_setting_value('trakt_username'))
         
-        header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-        }
-        
         list_params = {}
         for item in list:
             if item['value'] == '0':
@@ -878,7 +850,7 @@ def xhr_trakt_add_to_list():
         list = list_params
 
         try:
-            trakt = trak_api(api, list, header, True, True)
+            trakt = trak_api(api, list, oauth=true)
         except Exception as e:
             trakt_exception(e)
             return jsonify(status='Failed to add %s to %s\n%s' % (media['title'], list['name'], e))
@@ -892,12 +864,8 @@ def xhr_trakt_add_to_list():
         'items': [media]
     }
     
-    header = {
-        'trakt-user-login': '%s' % (get_setting_value('trakt_username')),
-    }
-    
     try:
-        trakt = trak_api(api, params, header, True, True)
+        trakt = trak_api(api, params, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return jsonify(status='Failed to add %s to %s\n%s' % (media['title'], list['name'], e))
