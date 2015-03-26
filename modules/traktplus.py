@@ -789,7 +789,7 @@ def xhr_trakt_get_lists(user=None, mobile=False):
         user = get_setting_value('trakt_username')
 
     logger.log('TRAKT :: Fetching %s\'s custom lists' % user, 'INFO')
-    api = '/user/%s/lists' % (user)
+    api = '/users/%s/lists' % (user)
     
     try:
         trakt = trak_api(api, oauth=True)
@@ -820,7 +820,7 @@ def xhr_trakt_get_lists(user=None, mobile=False):
 def xhr_trakt_custom_list(slug, user, mobile=False):
 
     logger.log('TRAKT :: Fetching %s' % slug, 'INFO')
-    api = '/users/%s/lists/%s/items?extended=full,images' % (user, slug)
+    api = '/users/%s/lists/%s/items' % (user, slug)
 
     try:
         trakt = trak_api(url)
@@ -833,7 +833,7 @@ def xhr_trakt_custom_list(slug, user, mobile=False):
 
     return render_template('traktplus/trakt-custom_lists.html',
         list=trakt,
-        title=trakt['name'],
+        title='Custom List',
     )
 
 
