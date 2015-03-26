@@ -3,7 +3,6 @@
   <a class="trakt_user link addloading" data-username="{{ user }}" title="Back to profile">{{ user }}</a>'s {{ title }}
 {% endblock %}
 {% block trakt_content %}
-{% if rated %}
 
   <div class="trakt_choices">
     <b>{{ type }}</b>
@@ -19,32 +18,46 @@
     <span class="user_rated">
       <b>
         <a class="trakt_user link addloading" data-username="{{ user }}" title="Back to profile">{{ user }}</a>
-        loves {{ loved }} {{ type }}
+        loves {{ loved }} {% if loved == 1 %} {{ type[:-1] }} {% else %} {{ type }} {% endif %}
       </b>
     </span>
-    {% for item in rated.loved %}
-      {% if loved %}
-        <li class="goto_{{ type[:-1]|lower }} addloading" data-id="{{ item.imdb_id }}">
-          {{ item.title }} {% if type == 'Movies' %}({{ item.year }}){% endif %}
+    {% if rated.loved %}
+      {% if type == 'Movies' %}
+        {% for item in rated.loved %}
+          <li class="goto_{{ type[:-1]|lower }} addloading" data-id="{{ item.movie.ids.slug }}">
+            {{ item.movie.title }} ({{ item.movie.year }})
         </li>
-      {% endif %}
-    {% endfor %}
-
-    <span class="user_rated">
+      {% endfor %}
+    {% else %}
+      {% for item in rated.loved %}
+        <li class="goto_{{ type[:-1]|lower }} addloading" data-id="{{ item.show.ids.slug }}">
+          {{ item.show.title }}
+        </li>
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+  <span class="user_rated">
       <b>
         <a class="trakt_user link addloading" data-username="{{ user }}" title="Back to profile">{{ user }}</a>
-        hates {{ hated }} {{ type }}
+        hates {{ hated }} {% if hated == 1 %} {{ type[:-1] }} {% else %} {{ type }} {% endif %}
       </b>
     </span>
-    {% for item in rated.hated %}
-      {% if hated %}
-        <li class="goto_{{ type[:-1]|lower }} addloading" data-id="{{ item.imdb_id }}">
-          {{ item.title }} {% if type == 'Movies' %}({{ item.year }}){% endif %}
+    {% if rated.hated %}
+      {% if type == 'Movies' %}
+        {% for item in rated.hated %}
+          <li class="goto_{{ type[:-1]|lower }} addloading" data-id="{{ item.movie.ids.slug }}">
+            {{ item.movie.title }} ({{ item.movie.year }})
         </li>
+        {% endfor %}
+      {% else %}
+        {% for item in rated.hated %}
+          <li class="goto_{{ type[:-1]|lower }} addloading" data-id="{{ item.show.ids.slug }}">
+            {{ item.show.title }}
+          </li>
+        {% endfor %}
       {% endif %}
-    {% endfor %}
+    {% endif %}
   </ul>
   </div>
 
-{% endif %}
 {% endblock %}
