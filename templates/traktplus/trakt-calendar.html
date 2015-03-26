@@ -38,7 +38,11 @@
           {% else %}
             Season {{ item.episode.season }}
           {% endif %}
-          <span class="time">{{ item.show.airs.time|format_date('time') }}</span>
+          {% if item.show.airs.time %}
+             <span class="time">{{ item.show.airs.time|format_date('time') }}</span>
+          {% else %}
+             <span class="time">Unknown</span>
+          {% endif %}
         </li>
 	    {% endfor %}
     {% endfor %}
