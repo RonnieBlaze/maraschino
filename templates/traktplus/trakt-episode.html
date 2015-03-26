@@ -9,8 +9,11 @@
   <div class="episode inner">
     <div class="info">
       <div class="screenshot">
-        <img src="{{ episode.episode.images.screen }}"/>
-
+        {% if episode.episode.images.screenshot.thumb %}
+          <img src="{{ episode.episode.images.screenshot.thumb }}"/>
+        {% else %}
+          <img src="/static/images/trakt/poster.png" width="95" >
+        {% endif %}
         {% if episode.episode.in_collection %}
           <div class="collection"></div>
         {% endif %}
@@ -36,7 +39,7 @@
         </tr>
         <tr>
           <td><b>Aired:</b></td>
-          <td>{{ episode.episode.first_aired }}</td>
+          <td>{{ episode.episode.first_aired|format_date('day') }}</td>
         </tr>
         <tr>
           <td><b>Runtime:</b></td>
@@ -68,19 +71,19 @@
           <table>
             <tr>
               <td><b>Votes:</b></td>
-              <td>{{ episode.episode.ratings.votes }}</td>
+              <td>{{ episode.episode.votes }}</td>
             </tr>
             <tr>
               <td><b>Percentage:</b></td>
-              <td>{{ episode.episode.ratings.percentage }}</td>
+              <td>{{ (episode.episode.rating * 10)|round|int }}</td>
             </tr>
             <tr>
-              <td><b>Loved:</b></td>
-              <td>{{ episode.episode.ratings.loved }}</td>
+              <td><b>Collected by:</b></td>
+              <td>{{ episode.stats.collection }}</td>
             </tr>
             <tr>
-              <td><b>Hated:</b></td>
-              <td>{{ episode.episode.ratings.hated }}</td>
+              <td><b>Watched by:</b></td>
+              <td>{{ episode.stats.watchers }}</td>
             </tr>
           </table>
         </div>
