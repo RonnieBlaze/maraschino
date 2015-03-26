@@ -706,7 +706,7 @@ def xhr_trakt_calendar(type, mobile=False):
 def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
 
     if type == 'episode':
-        show = 'shows/%s?extended=full' % (id)
+        show = '/shows/%s?extended=full' % (id)
         api = '/shows/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
         stat_api = '/shows/%s/seasons/%s/episodes/%s/stats' % (id, season, episode)
     elif type == 'show':
@@ -758,7 +758,7 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
 
     if type == 'episode':
         title = trakt_show['title'] + ': ' + trakt['title']
-        episode = {'show':trakt_show, 'episode':trakt, 'stats':trakt_stat)
+        episode = {'show':trakt_show, 'episode':trakt, 'stats':trakt_stat}
         return render_template('traktplus/trakt-episode.html',
             episode=episode,
             type=type,
