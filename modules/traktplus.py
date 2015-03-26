@@ -81,9 +81,6 @@ def update_sync(api_urls):
     username = get_setting_value('trakt_username')
     file_path = '%s/cache/trakt/sync.json' % DATA_DIR
 
-    print 'entering update_sync'
-    print username, file_path
-
     for api in api_urls:
         key = api.split('/')[2]
         type = api.split('/')[3][:-1]
@@ -102,7 +99,7 @@ def update_sync(api_urls):
         with open(file_path, 'w') as outfile:
             json.dump(SYNC, outfile)
     except Exception as e:
-        print e
+        trakt_exception(e)
     outfile.close
 
 
@@ -113,14 +110,14 @@ def sync_url():
     api_urls=[]
 
     try:
-        response = trak_api(api, oauth=True, dev=True)
+        response = trak_api(api, oauth=True)
     except Exception as e:
-        print e
+        trakt_exception(e)
         sleep(10)
         try:
             response = trak_api(api, oauth=True)
         except Exception as e:
-            print e
+            trakt_exception(e)
             return False
 
     if not SYNC[username]['watched']['modified']:
@@ -507,18 +504,18 @@ def xhr_trakt_profile(user=None, mobile=False):
     try:
         movies_progress = 100 * float(counts['watched_m']) / float(counts['total_m'])
     except Exception as e:
-       print e
+       trakt_exception(e)
        movies_progress = 0
     try:
        episodes_progress = 100 * float(counts['watched_e']) / float(counts['total_e'])
     except Exception as e:
-       print e
+       trakt_exception(e)
        episodes_progress = 0
 
     try:
         history = sorted(responses[1] + responses[2][:5], key=itemgetter('watched_at'), reverse=True)
     except Exception as e:
-        print 'Exception', e
+        trakt_exception(e)
 
 
     if mobile:
