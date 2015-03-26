@@ -8,7 +8,7 @@
   <div class="profile_custom_lists">
     <ul>
       {% for item in lists %}
-        <li class="get_list addloading" data-xhr_url="list/{{ item.slug }}/{{ user }}">
+        <li class="get_list addloading" data-xhr_url="list/{{ item.ids.slug }}/{{ user }}">
           {{ item.name }}
         </li>
       {% endfor %}
@@ -21,9 +21,9 @@
 
   <div class="profile_custom_lists">
     <ul>
-      {% for item in list['items'] %}
+      {% for item in list %}
         {% if item.type == 'show' %}
-        <li class="goto_show addloading" data-id="{{ item.show.imdb_id }}">
+        <li class="goto_show addloading" data-id="{{ item.show.ids.slug }}">
           {{ item.show.title }}
           <span class="type">
             {{ item.type }}
@@ -32,8 +32,8 @@
         {% endif %}
 
         {% if item.type == 'season' %}
-        <li class="goto_show addloading" data-id="{{ item.show.imdb_id }}">
-          {{ item.show.title }} season {{ item.season }}
+        <li class="goto_show addloading" data-id="{{ item.show.ids.slug }}">
+          {{ item.show.title }} season {{ item.season.number }}
           <span class="type">
             {{ item.type }}
           </span>
@@ -42,11 +42,11 @@
 
         {% if item.type == 'episode' %}
         <li class="goto_episode addloading" 
-          data-id="{{ item.show.imdb_id }}" 
+          data-id="{{ item.show.ids.slug }}" 
           data-season="{{ item.episode.season }}"
-          data-episode="{{ item.episode.episode }}"
+          data-episode="{{ item.episode.number }}"
         >
-          {{ item.show.title }} {{ item.episode.season }}x{{ item.episode.episode }} - {{ item.episode.title }}
+          {{ item.show.title }} {{ item.episode.season }}x{{ item.episode.number }} - {{ item.episode.title }}
           <span class="type">
             {{ item.type }}
           </span>
@@ -54,7 +54,7 @@
         {% endif %}
 
         {% if item.type == 'movie' %}
-        <li class="goto_movie addloading" data-id="{{ item.movie.imdb_id }}">
+        <li class="goto_movie addloading" data-id="{{ item.movie.ids.slug }}">
           {{ item.movie.title }} ({{ item.movie.year }})
           <span class="type">
             {{ item.type }}
