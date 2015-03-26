@@ -704,6 +704,7 @@ def xhr_trakt_calendar(type, mobile=False):
 @app.route('/xhr/trakt/summary/<type>/<id>/<season>/<episode>')
 @requires_auth
 def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
+    username = get_setting_value('trakt_username')
 
     if type == 'episode':
         show = '/shows/%s?extended=full' % (id)
