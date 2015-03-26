@@ -706,14 +706,22 @@ def xhr_trakt_calendar(type, mobile=False):
 def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
 
     if type == 'episode':
-        api = '/show/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
-        stat_api = '/show/%s/seasons/%s/episodes/%s/stats' % (id, season, episode)
+        show = 'shows/%s?extended=full' % (id)
+        api = '/shows/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
+        stat_api = '/shows/%s/seasons/%s/episodes/%s/stats' % (id, season, episode)
     elif type == 'show':
         api = '/shows/%s?extended=full,images' % (id)
         stat_api = '/shows/%s/stats' % (id)
     else:
         api = '/movies/%s?extended=full,images' % (id)
         stat_api = '/movies/%s/stats' % (id)
+
+    if type == 'episode':
+        try:
+            trakt_show = trak_api(show, oauth=True)
+        except Exception as e:
+            trakt_exception(e)
+            return render_template('traktplus/trakt-base.html', message=e)
 
     try:
         trakt = trak_api(api, oauth=True)
@@ -749,10 +757,12 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
         return trakt
 
     if type == 'episode':
+        title = trakt_show['title'] + ': ' + trakt['title']
+        episode = {'show':trakt_show, 'episode':trakt, 'stats':trakt_stat)
         return render_template('traktplus/trakt-episode.html',
-            episode=trakt,
+            episode=episode,
             type=type,
-            title=trakt['episode']['title'],
+            title=title,
             stats=trakt_stat,
             )
     elif type == 'show':
