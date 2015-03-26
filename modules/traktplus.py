@@ -8,7 +8,6 @@ from operator import itemgetter
 TRAKT_TOKEN = {}
 SYNC = {}
 def trak_api(api, body={}, head={}, oauth=False ,dev=False):
-    global TRAKT_TOKEN      
     url='https://api-v2launch.trakt.tv'
     username = get_setting_value('trakt_username')
             
@@ -41,7 +40,7 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
 
 
 def trakt_apitoken():
-    global TRAKT_TOKEN, SYNC
+    global TRAKT_TOKEN
     username = get_setting_value('trakt_username')
 
     if not username in TRAKT_TOKEN:
@@ -54,9 +53,10 @@ def trakt_apitoken():
             }
             token = trak_api(api, body=credentials)
             TRAKT_TOKEN.update({username:token['token']})
-            SYNC = read_sync()
+            read_sync()
 
 def read_sync():
+    global SYNC
     username = get_setting_value('trakt_username')
     file_path = '%s/cache/trakt/sync.json' % DATA_DIR
     if os.path.isfile(file_path):
@@ -64,17 +64,20 @@ def read_sync():
         data_string = data.read()
         data.close()
         json_data = json.JSONDecoder().decode(data_string)
-        if not username in json_data:
+        if username not in json_data:
             logger.log('TRAKT :: %s not found in %s' % (username, file_path), 'DEBUG')
             json_data = {username: {'watched': {'modified': '', 'trakt' : []},'collection': {'modified': '','trakt': []},'watchlist':{'modified':'','trakt':[]}}}
     else:
         logger.log('TRAKT :: file %s not found' % file_path, 'DEBUG')
         json_data = {username: {'watched': {'modified': '', 'trakt' : []},'collection': {'modified': '','trakt': []},'watchlist':{'modified':'','trakt':[]}}}
 
-    return json_data
+    SYNC = json_data
+    update_sync(sync_url())
 
 def update_sync(api_urls):
     global SYNC
+    if not api_urls:
+        return
     username = get_setting_value('trakt_username')
     file_path = '%s/cache/trakt/sync.json' % DATA_DIR
 
@@ -227,7 +230,9 @@ def img_cache(type, filename):
 @app.route('/xhr/traktplus/')
 def xhr_traktplus():
     default = get_setting_value('trakt_default_view')
-
+    
+    trakt_apitoken()
+    
     if default == 'trending_shows':
         return xhr_trakt_trending('shows')
     elif default == 'trending_movies':
@@ -254,6 +259,7 @@ def xhr_trakt_recommendations(type=None, mobile=False):
     if not type:
         type = get_setting_value('trakt_default_media')
 
+    update_sync(sync_url())
     logger.log('TRAKT :: Fetching %s recommendations' % type, 'INFO')
 
     api = '/recommendations/%s?extended=full,images' % (type)
@@ -292,10 +298,7 @@ def xhr_trakt_trending(type=None, mobile=False):
     if not type:
         type = get_setting_value('trakt_default_media')
 
-    trakt_apitoken()
-    api_urls = sync_url()
-    if api_urls:
-        update_sync(api_urls)
+    update_sync(sync_url())
     
     limit = int(get_setting_value('trakt_trending_limit'))
     logger.log('TRAKT :: Fetching trending %s' % type, 'INFO')
@@ -380,6 +383,8 @@ def xhr_trakt_friends(user=None, mobile=False):
     pending = None
     responses = []
     
+    update_sync(sync_url())
+    
     if not user:
         friends_api = '/users/me/friends?extended=full,images'
         pending_api = '/users/requests'
@@ -462,7 +467,8 @@ def xhr_trakt_profile(user=None, mobile=False):
         username = get_setting_value('trakt_username')
     else:
         username = user
-
+    
+    update_sync(sync_url())
     logger.log('TRAKT :: Fetching %s\'s profile information' % user, 'INFO')
     counts = {'collected_e': 0, 'collected_w': 0, 'watched_m': 0, 'total_m': 0, 'watched_e': 0, 'total_e': 0} 
     api_urls = ['/users/%s?extended=full,images' % (user), '/users/%s/history/movies?extended=full,images&page=1&limit=5' % (user),
@@ -680,6 +686,7 @@ def xhr_trakt_rated(user, type=None, mobile=False):
 def xhr_trakt_calendar(type, mobile=False):
     logger.log('TRAKT :: Fetching %s calendar' % type, 'INFO')
     today = time.strftime('%Y-%m-%d')
+    update_sync(sync_url())
 
     if type != 'Premieres':
         api = '/calendars/shows/%s/6?extended=full' % today
