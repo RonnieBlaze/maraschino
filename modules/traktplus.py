@@ -647,12 +647,12 @@ def xhr_trakt_rated(user, type=None, mobile=False):
 
     if trakt:
         for item in trakt:
-            if item['rating'] == 'love':
+            if item['rating'] == 10:
                 rated['loved'].append(item)
-            elif item['rating'] == 'hate':
+            elif item['rating'] == 1:
                 rated['hated'].append(item)
-        loved = len(rated['loved'])
-        hated = len(rated['hated'])
+    loved = len(rated['loved'])
+    hated = len(rated['hated'])
 
     return render_template('traktplus/trakt-rated.html',
         rated=rated,
