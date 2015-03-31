@@ -437,12 +437,6 @@ AVAILABLE_MODULES = [
         'delay': 10,
         'settings': [
             {
-                'key': 'trakt_api_key',
-                'value': '',
-                'description': 'Trakt API Key',
-                'link': 'http://trakt.tv/settings/api',
-            },
-            {
                 'key': 'trakt_username',
                 'value': '',
                 'description': 'Trakt Username',
@@ -460,8 +454,6 @@ AVAILABLE_MODULES = [
                 'options': [
                     {'value': 'trending_shows', 'label': 'Trending (TV Shows)'},
                     {'value': 'trending_movies', 'label': 'Trending (Movies)'},
-                    {'value': 'activity_friends', 'label': 'Activity (Friends)'},
-                    {'value': 'activity_community', 'label': 'Activity (Community)'},
                     {'value': 'friends', 'label': 'Friends'},
                     {'value': 'calendar' , 'label': 'Calendar'},
                     {'value': 'recommendations_shows' , 'label': 'Recommendations (TV Shows)'},
