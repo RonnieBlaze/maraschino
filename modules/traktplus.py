@@ -188,7 +188,6 @@ def cache_image(image, type):
 
     x = image.rfind('/')
     filename = image[x:]
-    filename = filename.split("?")[0]
     file_path = "%s%s" % (dir, filename)
 
     if not os.path.exists(file_path):
