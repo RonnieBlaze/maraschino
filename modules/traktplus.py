@@ -180,20 +180,11 @@ def get_list(content, media_type):
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'shows'))
 create_dir(os.path.join(DATA_DIR, 'cache', 'trakt', 'movies'))
 
-def small_poster(image):
-    if not 'poster-small' in image:
-        x = image.rfind('.')
-        #image = image[:x] + '-138' + image[x:]
-    return image
-
-
 def cache_image(image, type):
     if type == 'shows':
         dir = '%s/cache/trakt/shows' % DATA_DIR
     else:
         dir = '%s/cache/trakt/movies' % DATA_DIR
-
-    image = small_poster(image)
 
     x = image.rfind('/')
     filename = image[x:]
