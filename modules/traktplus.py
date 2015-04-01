@@ -340,28 +340,6 @@ def xhr_trakt_trending(type=None, mobile=False):
         title='Trending',
     )
 
-@app.route('/xhr/trakt/activity')
-@app.route('/xhr/trakt/activity/<type>')
-@requires_auth
-def xhr_trakt_activity(type='friends', mobile=False):
-    logger.log('TRAKT :: Fetching %s activity' % type, 'INFO')
-
-    url = 'http://api.trakt.tv/activity/%s.json/%s' % (type, trakt_apikey())
-    try:
-        trakt = trak_api(url)
-    except Exception as e:
-        trakt_exception(e)
-        return render_template('traktplus/trakt-base.html', message=e)
-
-    if mobile:
-        return trakt
-
-    return render_template('traktplus/trakt-activity.html',
-        activity=trakt,
-        type=type.title(),
-        title='Activity',
-    )
-
 @app.route('/xhr/trakt/friends')
 @app.route('/xhr/trakt/friends/<user>')
 @requires_auth
