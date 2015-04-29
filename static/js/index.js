@@ -1788,13 +1788,13 @@ $(document).ready(function() {
         if (action == 'approve') {
           li.children('.req_buttons').remove();
           li.css('background', 'url(' + WEBROOT + '/static/images/alpha/fff_10.png)');
-          popup_message(user + ' has been added to friends list');
+          popup_message('Follow reqest has been Approved');
         }
         else {
           li.transition({opacity: 0, duration: 1000}, function(){
             li.remove();
           });
-          popup_message(user + 's friend request has been denied');
+          popup_message('Follow request has been Denied');
         }
       }
       else {
