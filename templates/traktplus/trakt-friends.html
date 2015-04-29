@@ -13,8 +13,8 @@
           <b>This user has sent you a friend request.</b>
 
           <div class="req_buttons">
-            <span class="req_btn friend_action" data-action="approve" data-user="{{ req.user.username }}">Approve</span>
-            <span class="req_btn friend_action" data-action="deny" data-user="{{ req.user.username }}">Deny</span>
+            <span class="req_btn friend_action" data-action="approve" data-user="{{ req.id }}">Approve</span>
+            <span class="req_btn friend_action" data-action="deny" data-user="{{ req.id }}">Deny</span>
           </div>
         </li>
       {% endfor %}
