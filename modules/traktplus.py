@@ -7,7 +7,7 @@ from operator import itemgetter
 
 TRAKT_TOKEN = {}
 SYNC = {}
-def trak_api(api, body={}, head={}, oauth=False ,dev=False):
+def trak_api(api, body={}, head={}, method='', oauth=False ,dev=False):
     url='https://api-v2launch.trakt.tv'
     username = get_setting_value('trakt_username')
             
@@ -26,9 +26,13 @@ def trak_api(api, body={}, head={}, oauth=False ,dev=False):
     else:
         request = urllib2.Request(url + api, headers=head)
     
+    if method == 'delete':
+        request.get_method = lambda: 'DELETE'
+    
     response = urllib2.urlopen(request)
     response = response.read()
-    response = json.JSONDecoder().decode(response)
+    if method != 'delete':
+        response = json.JSONDecoder().decode(response)
     
     if dev:
       print url + api
@@ -364,6 +368,8 @@ def xhr_trakt_friends(user=None, mobile=False):
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)
     
+    logger.log('TRAKT :: %s pending request found' % len(pending), 'INFO')
+    
     for friend in friends:
         api = ['/users/%s/history/movies' % friend['user']['username'],
                '/users/%s/history/episodes' % friend['user']['username'],
@@ -405,19 +411,19 @@ def xhr_trakt_friends(user=None, mobile=False):
 @app.route('/xhr/trakt/friend/<action>/<user>')
 @requires_auth
 def xhr_trakt_friend_action(action, user):
-    api = '/users/%s/history/%s' % (action, user)
-
+    method = None
+    api = '/users/requests/%s' % (user)
+    
+    if action == 'deny':
+        method = 'delete'
+    
     try:
-        trakt = trak_api(api, oauth=True)
+        trakt = trak_api(api, body=action, method=method, oauth=True)
     except Exception as e:
         trakt_exception(e)
         return jsonify(status='%s friend failed\n%s' % (action.title(), e))
 
-    if trakt['status'] == 'success':
-        return jsonify(status='successful')
-    else:
-        return jsonify(status=action.title() + ' friend failed')
-
+    return jsonify(status='successful')
 
 @app.route('/xhr/trakt/profile')
 @app.route('/xhr/trakt/profile/<user>')
