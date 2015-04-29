@@ -431,16 +431,14 @@ def xhr_trakt_friend_action(action, user):
 def xhr_trakt_profile(user=None, mobile=False):
     if not user:
         user = 'me'
-        username = get_setting_value('trakt_username')
-    else:
-        username = user
-    
-    update_sync(sync_url())
+        update_sync(sync_url())
+
     logger.log('TRAKT :: Fetching %s\'s profile information' % user, 'INFO')
-    counts = {'collected_e': 0, 'collected_w': 0, 'watched_m': 0, 'total_m': 0, 'watched_e': 0, 'total_e': 0} 
+    counts = {'collected_e': 0, 'collected_w': 0, 'watched_m': 0, 'total_m': 0, 'watched_e': 0, 'total_e': 0}
     api_urls = ['/users/%s?extended=full,images' % (user), '/users/%s/history/movies?extended=full,images&page=1&limit=5' % (user),
                 '/users/%s/history/episodes?extended=full,images&page=1&limit=5' % (user), '/users/%s/watching' % (user) ,
-                '/sync/collection/movies', '/sync/collection/shows', '/sync/watched/shows']
+                '/users/%s/collection/movies' % (user), '/users/%s/collection/shows' % (user), '/users/%s/watched/movies' % (user),
+                '/users/%s/watched/shows' % (user)]
     responses = []
     for url in api_urls:
         try:
@@ -454,7 +452,7 @@ def xhr_trakt_profile(user=None, mobile=False):
     for collection in responses[5]:
         for s in collection['seasons']:
             counts['total_e'] += len(s['episodes'])
-        for watch in responses[6]:
+        for watch in responses[7]:
             if watch['show']['ids']['trakt'] == collection['show']['ids']['trakt']:
                 for s in collection['seasons']:
                     counts['collected_e'] += len(s['episodes'])
@@ -470,8 +468,8 @@ def xhr_trakt_profile(user=None, mobile=False):
     counts['total_m'] = len(responses[4])
     
     for collection in responses[4]:
-        for id in SYNC[username]['watched']['trakt']:
-            if id == 'm' + str( collection['movie']['ids']['trakt'] ):
+        for watched in responses[6]:
+            if watched['movie']['ids']['trakt'] == collection['movie']['ids']['trakt']:
                 counts['watched_m'] += 1
                 break
 
