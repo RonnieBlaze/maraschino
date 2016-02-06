@@ -200,8 +200,9 @@ def history(limit):
 
 # returns a link with the path to the required image from SB
 def get_pic(tvdb, style='banner'):
-    return '%s/xhr/sickbeard/get_%s/%s' % (maraschino.WEBROOT, style, tvdb)
-
+        #Sickrage and Sickbeard share the same local cache
+    return '%s/xhr/sickrage/get_%s/%s' % (maraschino.WEBROOT, style, tvdb)
+    
 
 @app.route('/xhr/sickbeard/get_ep_info/<tvdbid>/<season>/<ep>/')
 def get_episode_info(tvdbid, season, ep):
