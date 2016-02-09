@@ -56,7 +56,9 @@ def index():
     if get_setting_value('random_backgrounds') == '1':
         try:
             backgrounds = []
-            custom_dir = 'static/images/backgrounds/custom/'
+            custom_dir = maraschino.RUNDIR + 'static/images/backgrounds/custom/'
+            bundled_dir = maraschino.RUNDIR + 'static/images/backgrounds/'
+            truncate = len(maraschino.RUNDIR)
 
             if os.path.exists(os.path.dirname(custom_dir)):
                 # use user-defined custom background
@@ -68,10 +70,11 @@ def index():
 
             else:
                 # use backgrounds bundled with Maraschino
-                backgrounds.extend(get_file_list('static/images/backgrounds/', ['.jpg', '.png']))
+                backgrounds.extend(get_file_list(bundled_dir, ['.jpg', '.png']))
 
             # select random background
             background = backgrounds[random.randrange(0, len(backgrounds))]
+            background = background[truncate:]
             if maraschino.WEBROOT:
                 background = maraschino.WEBROOT + '/' + background
 
