@@ -200,6 +200,29 @@ def cache_image(image, type):
 
     return '%s/cache/trakt/%s/%s' % (WEBROOT, type, filename[1:])
 
+def get_stats(url):
+    s_url = url + '/stats'
+    r_url = url + '/ratings'
+    w_url = url + '/watching'
+
+    try:
+        response = trak_api(s_url, oauth=True)
+    except Exception as e:
+        return e
+    try:
+        ratings = trak_api(r_url, oauth=True)
+    except Exception as e:
+        return e
+    try:
+        watching = trak_api(w_url, oauth=True)
+    except Exception as e:
+        return e
+
+    stats = response.copy()
+    stats.update(ratings)
+    stats['watching'] = watching
+    return stats
+	
 @app.template_filter('format_date')
 def format_date(value, format='date'):
     if format == 'date':
@@ -210,6 +233,24 @@ def format_date(value, format='date'):
         return datetime.datetime.strptime(value, '%H:%M').strftime('%I:%M %p').lstrip('0')
     if format == 'datetime':
         return datetime.datetime.strptime(value[:23], '%Y-%m-%dT%H:%M:%S.%f').strftime('%A, %B %d at %I:%M %p')
+
+@app.template_filter('round_off')
+def round_off(num):
+    if not isinstance(num, (int,long)):
+        return num
+    if not num or num <= 999:
+        return num
+    thou = 0
+    while num >= 1000:
+        thou += 1
+        num /= 1000.0
+    if thou >= 4:
+        return 'WOW'
+    if num >=100:
+        num = int(num)
+    else:
+        num = round(num,1)
+    return str(num) + ['','K','M','B'][thou]
 
 @app.route('/cache/trakt/<type>/<filename>')
 @requires_auth
@@ -678,13 +719,13 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
     if type == 'episode':
         show = '/shows/%s?extended=full' % (id)
         api = '/shows/%s/seasons/%s/episodes/%s?extended=full,images' % (id, season, episode)
-        stat_api = '/shows/%s/seasons/%s/episodes/%s/stats' % (id, season, episode)
+        stat_url = '/shows/%s/seasons/%s/episodes/%s' % (id, season, episode)
     elif type == 'show':
         api = '/shows/%s?extended=full,images' % (id)
-        stat_api = '/shows/%s/stats' % (id)
+        stat_url = '/shows/%s' % (id)
     else:
         api = '/movies/%s?extended=full,images' % (id)
-        stat_api = '/movies/%s/stats' % (id)
+        stat_url = '/movies/%s' % (id)
 
     if type == 'episode':
         try:
@@ -700,7 +741,7 @@ def xhr_trakt_summary(type, id, season=None, episode=None, mobile=False):
         return render_template('traktplus/trakt-base.html', message=e)
     
     try:
-        trakt_stat = trak_api(stat_api, oauth=True)
+        trakt_stat = get_stats(stat_url)
     except Exception as e:
         trakt_exception(e)
         return render_template('traktplus/trakt-base.html', message=e)

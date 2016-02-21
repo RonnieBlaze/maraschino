@@ -5,7 +5,6 @@
 {% block trakt_content %}
 
 {% if episode %}
-
   <div class="episode inner">
     <div class="info">
       <div class="screenshot">
@@ -31,7 +30,6 @@
           <div class="watched"></div>
         {% endif %}
       </div>
-
       <table>
         <tr>
           <td><b>Classification:</b></td>
@@ -50,47 +48,63 @@
           <td>{% for genre in episode.show.genres %}{{ genre }} {% endfor %}</td>
         </tr>
       </table>
-
       <p class="overview">
-        <span class="truncated">{{ episode.episode.overview|truncate(400, false) }}</span>
-        <span class="expanded" style="display: none;">{{ episode.episode.overview }}</span>
-        {% if episode.episode.overview|count > 400 %}
-          <a class="expand" href="#" title="More">[+]</a>
-        {% endif %}
+		{% if episode.episode.overview %}
+    	  <span class="truncated">{{ episode.episode.overview|truncate(400, false) }}</span>
+          <span class="expanded" style="display: none;">{{ episode.episode.overview }}</span>
+          {% if episode.episode.overview|count > 400 %}
+            <a class="expand" href="#" title="More">[+]</a>
+          {% endif %}
+		{% endif %}
       </p>
     </div>
-
     <div>
       <div class="toggle_hidden">
         <b>Stats</b>
         <img class="show_hidden" src="{{ url_for('static', filename='images/arrow_down.png') }}"/>
       </div>
-
       <div class="hidden">
         <div class="stats" align="center">
           <table>
             <tr>
+              <td><b>Watchers:</b></td>
+              <td>{{ stats.watchers|round_off }}</td>
+            </tr>
+            <tr>
+              <td><b>Plays:</b></td>
+              <td>{{ stats.plays|round_off }}</td>
+            </tr>
+            <tr>
+              <td><b>Currently watching:</b></td>
+              <td>{{ stats.watching|count }}</td>
+            </tr>
+            <tr>
+              <td><b>Collectors:</b></td>
+              <td>{{ stats.collectors|round_off }}</td>
+            </tr>
+          </table>
+          <table>
+            <tr>
               <td><b>Votes:</b></td>
-              <td>{{ episode.episode.votes }}</td>
+              <td>{{ stats.votes|round_off }}</td>
             </tr>
             <tr>
               <td><b>Percentage:</b></td>
-              <td>{{ (episode.episode.rating * 10)|round|int }}</td>
+              <td>{{ (stats.rating *10 )|round(2) }}%</td>
             </tr>
             <tr>
-              <td><b>Collected by:</b></td>
-              <td>{{ episode.stats.collection }}</td>
+              <td><b>Loved:</b></td>
+              <td>{{ stats.distribution['10']|round_off }}</td>
             </tr>
             <tr>
-              <td><b>Watched by:</b></td>
-              <td>{{ episode.stats.watchers }}</td>
+              <td><b>Hated:</b></td>
+              <td>{{ stats.distribution['1']|round_off }}</td>
             </tr>
           </table>
         </div>
       </div>
     </div>
   </div>
-
 {% endif %}
 
 {% endblock %}

@@ -56,7 +56,7 @@
         <div class="footer">
           <div class="item_info">
           <span class="percentage">{{ (movie.rating * 10)|round|int }}%</span>
-          <span class="votes">{{ movie.votes }} votes</span>
+          <span class="votes">{{ movie.votes|round_off }} votes</span>
           </div>
           <div class="item_rate" align="center">
             <div class="rate r_love {{ 'rated' if movie.rating == 'love' }}" data-rating="love" {% if movie.rating == 'love' %}title="Unrate"{% else %}title="Loved"{% endif %}></div>
@@ -119,30 +119,26 @@
           <table>
             <tr>
               <td><b>Watchers:</b></td>
-              <td>{{ stats.watchers }}</td>
+              <td>{{ stats.watchers|round_off }}</td>
             </tr>
             <tr>
               <td><b>Plays:</b></td>
-              <td>{{ stats.plays }}</td>
+              <td>{{ stats.plays|round_off }}</td>
             </tr>
             <tr>
-              <td><b>Scrobbles:</b></td>
-              <td></td>
+              <td><b>Currently Watching:</b></td>
+              <td>{{ stats.watching|count }}</td>
             </tr>
             <tr>
-              <td><b>Checkins:</b></td>
-              <td></td>
-            </tr>
-            <tr>
-              <td><b>In collection:</b></td>
-              <td>{{ stats.collection }}</td>
+              <td><b>Collectors:</b></td>
+              <td>{{ stats.collectors|round_off }}</td>
             </tr>
           </table>
 
           <table>
             <tr>
               <td><b>Votes:</b></td>
-              <td>{{ movie.votes }}</td>
+              <td>{{ movie.votes|round_off }}</td>
             </tr>
             <tr>
               <td><b>Percentage:</b></td>
@@ -150,11 +146,11 @@
             </tr>
             <tr>
               <td><b>Loved:</b></td>
-              <td></td>
+              <td>{{ stats.distribution['10']|round_off }}</td>
             </tr>
             <tr>
               <td><b>Hated:</b></td>
-              <td></td>
+              <td>{{ stats.distribution['1']|round_off }}</td>
             </tr>
           </table>
         </div>
